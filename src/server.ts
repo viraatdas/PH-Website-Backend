@@ -1,4 +1,5 @@
 import * as express from 'express';
+import 'express-async-errors';
 import * as cookieParser from 'cookie-parser';
 import * as logger from 'morgan';
 import * as mongoose from 'mongoose';
@@ -18,6 +19,7 @@ import { router as locations } from './routes/locations';
 import { router as credentials } from './routes/credentials';
 import { router as permissions } from './routes/permissions';
 import { router as autocomplete } from './routes/autocomplete';
+import { errorRes } from './utils';
 const { NODE_ENV, DB } = CONFIG;
 
 export default class Server {
@@ -40,20 +42,6 @@ export default class Server {
 	}
 
 	private setupMiddleware() {
-		// this.app.use(helmet());
-		// if (NODE_ENV !== 'test')
-		// 	NODE_ENV !== 'production'
-		// 		? this.app.use(logger('dev'))
-		// 		: this.app.use(logger('tiny'));
-
-		// this.app.use(express.json());
-		// this.app.use(express.urlencoded({ extended: true }));
-		// this.app.use(cookieParser());
-		// this.app.use(passportMiddleWare(passport).initialize());
-		// this.app.use(extractUser());
-		// this.app.use(cors());
-		// this.app.use(express.static(join(__dirname, '../frontend/build')));
-
 		this.app.use(helmet());
 		if (NODE_ENV === 'production') this.app.use(yes());
 		if (NODE_ENV !== 'test')
@@ -84,6 +72,12 @@ export default class Server {
 		this.app.get('*', (req, res) =>
 			res.sendFile(resolve(__dirname, '../frontend/build/index.html'))
 		);
+
+		// Any unhandled errors will be caught in this middleware
+		this.app.use((err, req, res, next) => {
+			console.error('Caught error:', err.message);
+			errorRes(res, 500, err.message);
+		});
 	}
 
 	private async mongoSetup() {

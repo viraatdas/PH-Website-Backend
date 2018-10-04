@@ -122,11 +122,7 @@ router.put('/:id', auth(), multer.any(), async (req, res) => {
 		if (!ObjectId.isValid(req.params.id))
 			return errorRes(res, 400, 'Invalid member ID');
 		if (!memberMatches(req.user, req.params.id))
-			return errorRes(
-				res,
-				401,
-				'You are unauthorized to edit this profile'
-			);
+			return errorRes(res, 401, 'You are unauthorized to edit this profile');
 
 		const files: Express.Multer.File[] = req.files
 			? (req.files as Express.Multer.File[])
@@ -151,11 +147,7 @@ router.put('/:id', auth(), multer.any(), async (req, res) => {
 			resumeLink
 		} = req.body;
 		if (!name)
-			return errorRes(
-				res,
-				400,
-				'Please provide your first and last name'
-			);
+			return errorRes(res, 400, 'Please provide your first and last name');
 		if (!email) return errorRes(res, 400, 'Please provide your email');
 		if (!isEmail(email)) return errorRes(res, 400, 'Invalid email');
 		if (!password) return errorRes(res, 400, 'A password is required');

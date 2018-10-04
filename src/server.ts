@@ -97,7 +97,7 @@ export default class Server {
 			return this.mongoose;
 		} catch (error) {
 			console.error('Error connecting to mongo:', error);
-			return process.exit(1);
+			throw error;
 		}
 	}
 }

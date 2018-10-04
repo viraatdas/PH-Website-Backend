@@ -53,9 +53,14 @@ export const sendResetEmail = async (member: IMemberModel, req: Request) => {
 	});
 	member.resetPasswordToken = token;
 	await member.save();
-	const resetUrl = `${req.protocol}://${req.get(
-		'host'
-	)}/reset?token=${token}`;
+	const resetUrl =
+		CONFIG.NODE_ENV !== 'production'
+			? `http://localhost:3000/reset?token=${token}`
+			: `https://purduehackers.com/reset?token=${token}`;
+
+	// const resetUrl = `${req.protocol}://${req.get(
+	// 	'host'
+	// )}/reset?token=${token}`;
 	return await _sendResetEmail(member, resetUrl);
 };
 
@@ -94,9 +99,11 @@ export const sendAccountCreatedEmail = async (
 	});
 	member.resetPasswordToken = token;
 	await member.save();
-	const resetUrl = `${req.protocol}://${req.get(
-		'host'
-	)}/reset?token=${token}`;
+	// const resetUrl = `${req.protocol}://${req.get('host')}/reset?token=${token}`;
+	const resetUrl =
+		CONFIG.NODE_ENV !== 'production'
+			? `http://localhost:3000/reset?token=${token}`
+			: `https://purduehackers.com/reset?token=${token}`;
 	return await _sendAccountCreatedEmail(
 		member,
 		event.name,

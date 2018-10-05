@@ -4,10 +4,13 @@ import { join } from 'path';
 import { readFileSync } from 'fs';
 import * as jwt from 'jsonwebtoken';
 import { compile } from 'handlebars';
+import * as sendGrid from '@sendgrid/mail';
 import CONFIG from '../config';
 import { IEventModel } from '../models/event';
 import { IMemberModel } from '../models/member';
 import { formatDate } from './';
+
+sendGrid.setApiKey(CONFIG.SENDGRID_KEY);
 
 const transport = nodemailer.createTransport({
 	host: 'smtp.sendgrid.net',
@@ -28,23 +31,19 @@ const accountCreatedTemplate = compile(
 
 const _sendResetEmail = async (
 	{ email, name }: { email: string; name: string },
-	resetUrl: string
+	url: string,
+	token: string
 ) =>
-	transport.sendMail({
-		from: `"${CONFIG.ORG_NAME}" <${CONFIG.EMAIL}>`, // sender address
-		to: email, // list of receivers
-		subject: 'Reset your Purdue Hackers account password', // Subject line
-		html: resetTemplate({
+	(sendGrid as any).send({
+		templateId: 'd-97ab2e626dbe4e32bcf0ccb7b719cd97',
+		from: `"${CONFIG.ORG_NAME}" <${CONFIG.EMAIL}>`,
+		to: email,
+		subject: 'Reset your Purdue Hackers account password',
+		dynamicTemplateData: {
 			name,
-			resetUrl
-		}),
-		attachments: [
-			{
-				filename: 'headerImage.png',
-				path: join(__dirname, '../emails', 'headerImage.png'),
-				cid: 'headerImage'
-			}
-		]
+			url,
+			token
+		}
 	});
 
 export const sendResetEmail = async (member: IMemberModel, req: Request) => {
@@ -58,17 +57,20 @@ export const sendResetEmail = async (member: IMemberModel, req: Request) => {
 			? `http://localhost:3000/reset?token=${token}`
 			: `https://purduehackers.com/reset?token=${token}`;
 
-	// const resetUrl = `${req.protocol}://${req.get(
-	// 	'host'
-	// )}/reset?token=${token}`;
-	return await _sendResetEmail(member, resetUrl);
+	const url =
+		CONFIG.NODE_ENV !== 'production'
+			? 'http://localhost:3000'
+			: 'https://purduehackers.com';
+
+	return await _sendResetEmail(member, url, token);
 };
 
 const _sendAccountCreatedEmail = async (
 	{ email, name }: { email: string; name: string },
 	eventName: string,
 	eventDate: Date,
-	resetUrl: string
+	url: string,
+	token: string
 ) =>
 	transport.sendMail({
 		from: `"${CONFIG.ORG_NAME}" <${CONFIG.EMAIL}>`,
@@ -78,7 +80,8 @@ const _sendAccountCreatedEmail = async (
 			name,
 			eventName,
 			eventDate: formatDate(eventDate),
-			resetUrl
+			url,
+			token
 		}),
 		attachments: [
 			{
@@ -104,10 +107,17 @@ export const sendAccountCreatedEmail = async (
 		CONFIG.NODE_ENV !== 'production'
 			? `http://localhost:3000/reset?token=${token}`
 			: `https://purduehackers.com/reset?token=${token}`;
+
+	const url =
+		CONFIG.NODE_ENV !== 'production'
+			? 'http://localhost:3000'
+			: 'https://purduehackers.com';
+
 	return await _sendAccountCreatedEmail(
 		member,
 		event.name,
 		event.eventTime,
-		resetUrl
+		url,
+		token
 	);
 };

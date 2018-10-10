@@ -96,6 +96,26 @@ router.get('/:id', async (req, res) => {
 	}
 });
 
+
+router.get("/before/:id", async (req, res) => {
+	try {
+		if (!ObjectId.isValid(req.params.id))
+			return errorRes(res, 400, "Invalid event ID");
+		const currentEvent = await Event.findById(req.params.id);
+ 		const results = await Event.find({}, "_id eventTime").exec();
+ 		var eventsBeforeIds: String[] = new Array();
+		for (var i = 0; i < results.length; i++) {
+			if (results[i].eventTime < currentEvent.eventTime) {
+				eventsBeforeIds.push(results[i]._id);
+			}
+		}
+ 		return successRes(res, { eventsBeforeIds });
+	} catch (error) {
+		console.log("EOR", error);
+		return errorRes(res, 500, error);
+	}
+});
+
 // TODO: Change to put request
 router.post('/:id', async (req, res, next) => {
 	try {

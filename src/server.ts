@@ -19,6 +19,8 @@ import { router as locations } from './routes/locations';
 import { router as credentials } from './routes/credentials';
 import { router as permissions } from './routes/permissions';
 import { router as autocomplete } from './routes/autocomplete';
+import { router as report } from './routes/report';
+
 import { errorRes } from './utils';
 const { NODE_ENV, DB } = CONFIG;
 
@@ -67,6 +69,7 @@ export default class Server {
 		this.app.use('/api/credentials', credentials);
 		this.app.use('/api/permissions', permissions);
 		this.app.use('/api/autocomplete', autocomplete);
+		this.app.use('/api/report', report);
 
 		// Serves react app, only used in production
 		this.app.get('*', (req, res) =>

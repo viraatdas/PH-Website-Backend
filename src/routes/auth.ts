@@ -86,11 +86,7 @@ router.post('/signup', multer.any(), async (req, res, next) => {
 		const maxYear = new Date().getFullYear() + 20;
 		const graduationYear = parseInt(req.body.graduationYear, 10);
 		if (!name)
-			return errorRes(
-				res,
-				400,
-				'Please provide your first and last name'
-			);
+			return errorRes(res, 400, 'Please provide your first and last name');
 		if (!email) return errorRes(res, 400, 'Please provide your email');
 		if (!isEmail(email)) return errorRes(res, 400, 'Invalid email');
 		if (!graduationYear)
@@ -165,8 +161,7 @@ router.post('/signup', multer.any(), async (req, res, next) => {
 
 		if (picture)
 			user.picture = await uploadToStorage(picture, 'pictures', user);
-		if (resume)
-			user.resume = await uploadToStorage(resume, 'resumes', user);
+		if (resume) user.resume = await uploadToStorage(resume, 'resumes', user);
 		user.privateProfile = privateProfile;
 		user.unsubscribed = unsubscribed;
 		user.phone = phone;
@@ -272,6 +267,7 @@ router.post('/forgot', async (req, res) => {
 				400,
 				`There is no member with the email: ${email}`
 			);
+<<<<<<< HEAD
 		// const token = jwt.sign({ id: member._id }, CONFIG.SECRET, { expiresIn: '2 days' });
 		// member.resetPasswordToken = token;
 		// await member.save();
@@ -281,6 +277,14 @@ router.post('/forgot', async (req, res) => {
 		// 		: `https://www.purduehackers.com/reset?token=${token}`;
 		// const response = await sendResetEmail(member, resetUrl);
 		await sendResetEmail(member, req);
+=======
+		const token = jwt.sign({ id: member._id }, CONFIG.SECRET, {
+			expiresIn: '2 days'
+		});
+		member.resetPasswordToken = token;
+		await member.save();
+		await sendResetEmail(member);
+>>>>>>> a08bcdcde564463b289f26ee44729e335a340716
 		return successRes(
 			res,
 			`A link to reset your password has been sent to: ${email}`

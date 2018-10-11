@@ -8,6 +8,8 @@ export interface IEventModel extends Document {
 	eventTime: Date;
 	privateEvent: boolean;
 	members: IMemberModel[];
+	createdAt: Date;
+	updatedAt: Date;
 }
 
 const schema = new Schema(

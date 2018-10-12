@@ -267,24 +267,12 @@ router.post('/forgot', async (req, res) => {
 				400,
 				`There is no member with the email: ${email}`
 			);
-<<<<<<< HEAD
-		// const token = jwt.sign({ id: member._id }, CONFIG.SECRET, { expiresIn: '2 days' });
-		// member.resetPasswordToken = token;
-		// await member.save();
-		// const resetUrl =
-		// 	CONFIG.NODE_ENV === 'development'
-		// 		? `http://localhost:3000/reset?token=${token}`
-		// 		: `https://www.purduehackers.com/reset?token=${token}`;
-		// const response = await sendResetEmail(member, resetUrl);
-		await sendResetEmail(member, req);
-=======
 		const token = jwt.sign({ id: member._id }, CONFIG.SECRET, {
 			expiresIn: '2 days'
 		});
 		member.resetPasswordToken = token;
 		await member.save();
 		await sendResetEmail(member);
->>>>>>> a08bcdcde564463b289f26ee44729e335a340716
 		return successRes(
 			res,
 			`A link to reset your password has been sent to: ${email}`

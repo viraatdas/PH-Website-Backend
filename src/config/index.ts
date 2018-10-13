@@ -21,7 +21,8 @@ const config = {
 	MAILGUN_DOMAIN: env.MAILGUN_DOMAIN || 'mydomain',
 	MAILGUN_SECRET: env.MAILGUN_SECRET || 'mysecret',
 	GC_BUCKET: env.GC_BUCKET || 'mybucket',
-	SENDGRID_KEY: env.SENDGRID_KEY || 'sendgridkey'
+	SENDGRID_KEY: env.SENDGRID_KEY || 'sendgridkey',
+	FACEBOOK_ACCESS_TOKEN: env.FACEBOOK_ACCESS_TOKEN || ''
 };
 
 export default config;

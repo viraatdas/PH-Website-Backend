@@ -1,6 +1,13 @@
-import { Event } from '../models/event';
 import CONFIG from '../config';
 const axios = require('axios');
+const fs = require('fs');
+const readline = require('readline');
+const { google } = require('googleapis');
+import { Event } from '../models/event';
+
+// If modifying these scopes, delete token.json.
+const SCOPES = ['https://www.googleapis.com/auth/calendar'];
+const TOKEN_PATH = '../../gCalToken.json';
 
 import Server from '../../src/server';
 
@@ -9,7 +16,7 @@ let server: Server;
 const accessToken = CONFIG.FACEBOOK_ACCESS_TOKEN;
 
 const syncFacebookEvents = async () => {
-	Server.createInstance().then(s => (server = s));
+	server = await Server.createInstance();
 
 	// Get all upcoming facebook events id's
 	try {

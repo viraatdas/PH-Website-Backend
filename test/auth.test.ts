@@ -1,3 +1,4 @@
+import 'jest';
 import * as supertest from 'supertest';
 import Server from '../src/server';
 import { generateUser } from '../src/utils/helper';

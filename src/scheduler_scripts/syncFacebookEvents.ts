@@ -1,70 +1,66 @@
-import CONFIG from '../config';
-const axios = require('axios');
-const fs = require('fs');
-const readline = require('readline');
-const { google } = require('googleapis');
 import { Event } from '../models/event';
-
-// If modifying these scopes, delete token.json.
-const SCOPES = ['https://www.googleapis.com/auth/calendar'];
-const TOKEN_PATH = '../../gCalToken.json';
-
+import CONFIG from '../config';
+import axios from 'axios';
 import Server from '../../src/server';
 
 let server: Server;
-
 const accessToken = CONFIG.FACEBOOK_ACCESS_TOKEN;
 
 const syncFacebookEvents = async () => {
-	server = await Server.createInstance();
-
 	// Get all upcoming facebook events id's
 	try {
-		const response = await axios.get(
+		server = await Server.createInstance();
+		const { data } = await axios.get(
 			`https://graph.facebook.com/purduehackers/events?time_filter=upcoming&access_token=${accessToken}`
 		);
 
-		const upcomingEvents = response.data.data;
-
+		const upcomingEvents = data.data;
 		for (const currEvent of upcomingEvents) {
-			const currEventId = currEvent.id;
-			const dbResponse = await Event.find({
-				facebook: `https://www.facebook.com/events/${currEventId}/`
+			const {
+				id: facebookId,
+				name: eventName,
+				place: { name: eventLocation },
+				start_time: eventTime
+			} = currEvent;
+
+			const mongoEvent = await Event.findOne({
+				facebook: `https://www.facebook.com/events/${facebookId}/`
 			}).exec();
 
-			if (!dbResponse) {
+			// New Facebook event
+			if (!mongoEvent) {
 				// Create db event
 				const event = new Event({
-					name: currEvent.name,
-					location: currEvent.place.name,
-					privateEvent: 0,
-					eventTime: currEvent.start_time,
-					facebook: `https://www.facebook.com/events/${currEventId}/`
+					name: eventName,
+					location: eventLocation,
+					privateEvent: false,
+					eventTime,
+					facebook: `https://www.facebook.com/events/${facebookId}/`
 				});
 
 				await event.save();
-				console.log('Saved succesfully');
 			} else {
 				// Update event
-				Event.findOneAndUpdate(
+				await Event.findOneAndUpdate(
 					{
-						facebook: `https://www.facebook.com/events/${currEventId}/`
+						facebook: `https://www.facebook.com/events/${facebookId}/`
 					},
 					{
 						$set: {
-							name: currEvent.name,
-							location: currEvent.place.name,
-							privateEvent: 0,
-							eventTime: currEvent.start_time,
-							facebook: `https://www.facebook.com/events/${currEventId}/`
+							name: eventName,
+							location: eventLocation,
+							privateEvent: false,
+							eventTime,
+							facebook: `https://www.facebook.com/events/${facebookId}/`
 						}
 					}
 				).exec();
-				console.log('Updated succesfully');
 			}
 		}
 	} catch (error) {
 		console.log('Error, ', error);
+	} finally {
+		await server.mongoose.disconnect();
 	}
 };
 

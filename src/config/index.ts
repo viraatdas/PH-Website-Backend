@@ -17,9 +17,6 @@ const config = {
 	CREDENTIAL_SECRET: env.CREDENTIAL_SECRET || 'CredentialSecret',
 	ORG_NAME: env.ORG_NAME || 'Purdue Hackers',
 	EMAIL: env.EMAIL || 'your@email.com',
-	EMAIL_PASSWORD: env.EMAIL_PASSWORD || 'SuperSecretPassword',
-	MAILGUN_DOMAIN: env.MAILGUN_DOMAIN || 'mydomain',
-	MAILGUN_SECRET: env.MAILGUN_SECRET || 'mysecret',
 	GC_BUCKET: env.GC_BUCKET || 'mybucket',
 	SENDGRID_KEY: env.SENDGRID_KEY || 'sendgridkey'
 };

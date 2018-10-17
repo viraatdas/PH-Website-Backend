@@ -20,7 +20,7 @@ export const sendResetEmail = async (member: IMemberModel) => {
 			: 'https://purduehackers.com';
 
 	return await (sendGrid as any).send({
-		templateId: 'd-97ab2e626dbe4e32bcf0ccb7b719cd97',
+		templateId: 'd-850d406dbbf240bc9f53f455ed975321',
 		from: `"${CONFIG.ORG_NAME}" <${CONFIG.EMAIL}>`,
 		to: member.email,
 		dynamicTemplateData: {
@@ -30,7 +30,6 @@ export const sendResetEmail = async (member: IMemberModel) => {
 		}
 	});
 };
-
 
 export const sendAccountCreatedEmail = async (
 	member: IMemberModel,
@@ -48,8 +47,8 @@ export const sendAccountCreatedEmail = async (
 			: 'https://purduehackers.com';
 
 	return await (sendGrid as any).send({
-		templateId: 'd-d27b542ca1ba49cfa335c84ca4d4f97a',
-		from: `"${CONFIG.ORG_NAME}" <${CONFIG.EMAIL}>`,
+		templateId: 'd-0bba1a0346c24bd69a46d81d2e950e55',
+		from: `${CONFIG.ORG_NAME} <${CONFIG.EMAIL}>`,
 		to: member.email,
 		dynamicTemplateData: {
 			name: member.name,

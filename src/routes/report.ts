@@ -1,43 +1,67 @@
 import * as express from 'express';
-// import * as paginate from 'express-paginate';
-import { isEmail } from 'validator';
-import { ObjectId, Db } from 'mongodb';
+import { ObjectId } from 'mongodb';
 import { Event } from '../models/event';
-import { Member, IMemberModel } from '../models/member';
-import { auth, hasPermissions } from '../middleware/passport';
-import { successRes, errorRes, sendAccountCreatedEmail, hasPermission } from '../utils';
+import { Member } from '../models/member';
+import { successRes, errorRes } from '../utils';
 export const router = express.Router();
 
-// TODO: Add auth to routes
-// TODO: Add permissions to routes
+// Creates an object with keys = 'month/year' and value = # with said date
+const formatDates = (r: any[]): object =>
+	// prettier-ignore
+	r.reduce((dates, date) => (
+		{...dates, [`${date._id.month < 10 ? '0' : ''}${date._id.month}/${date._id.year}`]: date.count}
+	), {});
 
-function formatDates(aggr: any[]): object {
-	const res = {};
-
-	for (const date of aggr) {
-		if (date._id.month < 10) {
-			res[`0${date._id.month}/${date._id.year}`] = date.count;
-		} else {
-			res[`${date._id.month}/${date._id.year}`] = date.count;
-		}
-	}
-	return res;
-}
+// TODO: FIX EVENT FRONT END
+// TODO: RUN FINAL TESTS ON STUFF
 
 router.get('/members', async (req, res, next) => {
 	try {
-		const result = await Promise.all([
+		const freshmanGraduationYear =
+			new Date().getMonth() > 8 ? new Date().getFullYear() + 1 : new Date().getFullYear();
+		const sophomoreGraduationYear = freshmanGraduationYear + 1;
+		const juniorGraduationYear = sophomoreGraduationYear + 1;
+		const seniorGraduationYear = juniorGraduationYear + 1;
+
+		const {
+			majors,
+			grades,
+			membersEventAttendance,
+			numNewMembersPerMonth,
+			numMembersPerMonth,
+			eventAttendancePerMonth
+		} = await Promise.all([
 			Member.aggregate([
 				{
 					$facet: {
-						major: [{ $match: { major: { $ne: null } } }, { $sortByCount: '$major' }],
-						class: [
-							{ $match: { graduationYear: { $in: [2019, 2020, 2021, 2022] } } },
+						// Creates an array of objects with
+						// (_id = major && count = # people with that major)
+						majors: [{ $match: { major: { $ne: null } } }, { $sortByCount: '$major' }],
+
+						// Creates an array of objects with
+						// (_id = graduation year && count = # people with that graduation year)
+						grades: [
+							{
+								$match: {
+									graduationYear: {
+										$in: [
+											freshmanGraduationYear,
+											sophomoreGraduationYear,
+											juniorGraduationYear,
+											seniorGraduationYear
+										]
+									}
+								}
+							},
 							{ $group: { _id: '$graduationYear', count: { $sum: 1 } } },
 							{ $sort: { _id: -1 } }
 						],
-						numPeoplePerDateJoined: [
+
+						// Creates an array of objects with
+						// (_id = { month: monthJoined, year: yearJoined} && count = # people that joined on that date)
+						numNewMembersPerMonth: [
 							{
+								// create month and year fields to sort with
 								$addFields: {
 									month: { $month: '$createdAt' },
 									year: { $year: '$createdAt' }
@@ -46,113 +70,121 @@ router.get('/members', async (req, res, next) => {
 							{
 								$group: { _id: { month: '$month', year: '$year' }, count: { $sum: 1 } }
 							},
+							// sort from oldest to newest
 							{ $sort: { '_id.year': 1, '_id.month': 1 } }
 						],
+
+						// Creates an array of objects with
+						// (_id = # events attended && count = # people that attended that many events)
 						membersEventAttendance: [
 							{ $match: { events: { $ne: null } } },
 							{
-								$group: { _id: { numEvents: { $size: '$events' } }, count: { $sum: 1 } }
+								$group: { _id: { $size: '$events' }, count: { $sum: 1 } }
 							},
 							{ $sort: { _id: 1 } }
 						]
 					}
 				}
-			]).exec(),
-			// Event attendance per month
+			])
+				.exec()
+				.then(result => {
+					// turns the resulting array into an object;
+					result = { ...result[0] };
+
+					// Creates the numMembersPerMonth field by setting each date count = sum of date counts prior
+					// prettier-ignore
+					result.numMembersPerMonth = result.numNewMembersPerMonth
+						.map(dateData => dateData = { ...dateData })
+						.map((dateData, index, arrayOfDates) => {
+							if (index !== 0) dateData.count += arrayOfDates[index - 1].count;
+
+							return dateData;
+						});
+
+					// Creates an object with keys = major, and value = # people in said major
+					// prettier-ignore
+
+					result.majors = result.majors.reduce((majorData, majorAggregationResult) => {
+						const individualWords = majorAggregationResult._id.split(" ");
+						let majorName = "";
+
+						if (individualWords.length >= 2) {
+							for (const word of individualWords) {
+								majorName += word[0];
+							}
+						} else {
+							majorName = majorAggregationResult._id
+						}
+
+						return {...majorData, [majorName]: majorAggregationResult.count}
+					}, {});
+
+					// Creates an object with keys = grade, and value = # people in said grade
+					// prettier-ignore
+					result.grades = result.grades.reduce((gradeData, gradeAggregationResult) => (
+						{...gradeData, [gradeAggregationResult._id]: gradeAggregationResult.count}
+					), {});
+
+					result.numNewMembersPerMonth = formatDates(result.numNewMembersPerMonth);
+					result.numMembersPerMonth = formatDates(result.numMembersPerMonth);
+
+					// Creates an object with keys = # events attended, and value = # people who attended said # events
+
+					result.membersEventAttendance = result.membersEventAttendance.reduce(
+						(membersEventAttendanceData, membersEventAttendanceAggregationResult) => ({
+							...membersEventAttendanceData,
+							[membersEventAttendanceAggregationResult._id]:
+								membersEventAttendanceAggregationResult.count
+						}),
+						{}
+					);
+
+					return result;
+				}),
+			// Gets event attendance per month
 			Event.aggregate([
+				// Creates an object with
+				// (_id = { month, year} && count = event attendance for said month
 				{ $match: { members: { $ne: null } } },
 				{
 					$addFields: {
 						month: { $month: '$eventTime' },
 						year: { $year: '$eventTime' },
-						numAtten: { $size: '$members' }
+						numMembersThatAttended: { $size: '$members' }
 					}
 				},
 				{
 					$group: {
 						_id: { month: '$month', year: '$year' },
-						count: { $sum: '$numAtten' }
+						count: { $sum: '$numMembersThatAttended' }
 					}
 				},
+				// sort from oldest to newest
 				{ $sort: { '_id.year': 1, '_id.month': 1 } }
-			]).exec()
-		]);
-
-		console.log('res', result[1]);
-		// format the response
-		const majorData = {};
-		const majorsAggregationResult = result[0][0].major;
-		for (const major of majorsAggregationResult) {
-			// Format the major name to be the first letters of every word
-			// if the major is more than two words
-			// ex: Computer Science -> CS
-			const individualWords = major._id.split(' ');
-			if (individualWords.length >= 2) {
-				let shortenedMajorName = '';
-				for (const word of individualWords) {
-					shortenedMajorName += word[0];
-				}
-
-				majorData[shortenedMajorName] = major.count;
-			} else {
-				majorData[major._id] = major.count;
-			}
-		}
-
-		// format the response
-		const classData = {
-			2022: 0,
-			2021: 0,
-			2020: 0,
-			2019: 0
-		};
-
-		const classAggregationResult = result[0][0].class;
-		for (const classElement of classAggregationResult) {
-			classData[classElement._id] = classElement.count;
-		}
-
-		const numPeoplePerDateJoinedAggregationResult = result[0][0].numPeoplePerDateJoined;
-		const numPeoplePerDateJoinedData = formatDates(numPeoplePerDateJoinedAggregationResult);
-
-		// Cumulative Date Joined Data
-		for (let i = 1; i < numPeoplePerDateJoinedAggregationResult.length; i++) {
-			numPeoplePerDateJoinedAggregationResult[i].count +=
-				numPeoplePerDateJoinedAggregationResult[i - 1].count;
-		}
-
-		const cumulativeDateJoinedData = {
-			'07/16': 0,
-			...formatDates(numPeoplePerDateJoinedAggregationResult)
-		};
-
-		const membersEventAttendanceData = [];
-		const membersEventAttendanceAggregationResult = result[0][0].membersEventAttendance;
-
-		for (const eventAttendance of membersEventAttendanceAggregationResult) {
-			if (eventAttendance._id.numEvents >= 10) {
-				if (!membersEventAttendanceData['>10']) {
-					membersEventAttendanceData['>10'] = eventAttendance.count;
-				} else {
-					membersEventAttendanceData['>10'] += eventAttendance.count;
-				}
-			} else {
-				membersEventAttendanceData[eventAttendance._id.numEvents] = eventAttendance.count;
-			}
-		}
-
-		const eventAttendancePerMonthAggregationResult = result[1];
-		const eventAttendancePerMonthData = formatDates(eventAttendancePerMonthAggregationResult);
+			])
+				.exec()
+				// sets result to be an object with a key so that it matches the
+				// format of the members aggregation result
+				.then(result => (result = { eventAttendancePerMonth: formatDates(result) }))
+		]).then(data =>
+			// combines the eventAggregationResult and memberAggregationResult into one object
+			// prettier-ignore
+			data.reduce((allResults, individualPromiseResult) => ({
+				...allResults,
+				...individualPromiseResult
+			}), {})
+		);
 
 		return successRes(res, {
-			classData,
-			majorData,
-			numPeoplePerDateJoinedData,
-			cumulativeDateJoinedData,
-			membersEventAttendanceData,
-			eventAttendancePerMonthData
+			majors,
+			grades,
+			membersEventAttendance,
+			numNewMembersPerMonth,
+			numMembersPerMonth,
+			eventAttendancePerMonth
 		});
 	} catch (error) {
+		console.error(error);
 		return errorRes(res, 500, error);
 	}
 });
@@ -162,7 +194,7 @@ router.get('/event/:id', async (req, res, next) => {
 		// Get individual event
 		if (!ObjectId.isValid(req.params.id)) return errorRes(res, 400, 'Invalid event ID');
 
-		const eventAndEventBeforeIds = await Promise.all([
+		const [event, eventsBeforeIds] = await Promise.all([
 			Event.findById(req.params.id)
 				.populate({
 					path: 'members',
@@ -170,41 +202,61 @@ router.get('/event/:id', async (req, res, next) => {
 				})
 				.exec(),
 			Event.find({}, '_id eventTime').exec()
+		]).then((result: any) => [
+			result[0],
+			result[1]
+				.filter(eventIdAndTime => eventIdAndTime.eventTime < result[0].eventTime)
+				.reduce(
+					(eventsBeforeIdsArray, eventsBeforeIdandTime) => [
+						...eventsBeforeIdsArray,
+						eventsBeforeIdandTime._id
+					],
+					[]
+				)
 		]);
 
-		const event = eventAndEventBeforeIds[0];
-		const eventName = event.name;
+		const freshmanGraduationYear =
+			new Date().getMonth() > 8 ? new Date().getFullYear() + 1 : new Date().getFullYear();
+		const sophomoreGraduationYear = freshmanGraduationYear + 1;
+		const juniorGraduationYear = sophomoreGraduationYear + 1;
+		const seniorGraduationYear = juniorGraduationYear + 1;
 
-		const eventIdsAndTimes = eventAndEventBeforeIds[1];
-		const eventsBeforeIds: any[] = new Array();
-		for (const eventIdAndTime of eventIdsAndTimes) {
-			if (eventIdAndTime.eventTime < event.eventTime) {
-				eventsBeforeIds.push(new ObjectId(eventIdAndTime._id));
-			}
-		}
-
-		const result = await Member.aggregate([
+		const {
+			majors,
+			grades,
+			membersEventAttendancePriorToTheEvent,
+			membersCurrentEventAttendance
+		} = await Member.aggregate([
 			{
 				$facet: {
-					major: [
+					majors: [
 						{ $match: { _id: { $in: event.members }, major: { $ne: null } } },
 						{ $sortByCount: '$major' }
 					],
-					class: [
+					grades: [
 						{
 							$match: {
 								_id: { $in: event.members },
-								graduationYear: { $in: [2019, 2020, 2021, 2022] }
+								graduationYear: {
+									$in: [
+										freshmanGraduationYear,
+										sophomoreGraduationYear,
+										juniorGraduationYear,
+										seniorGraduationYear
+									]
+								}
 							}
 						},
 						{ $group: { _id: '$graduationYear', count: { $sum: 1 } } },
 						{ $sort: { _id: 1 } }
 					],
-					membersEventAttendance: [
+					membersEventAttendancePriorToTheEvent: [
+						// matches members who attended the event
 						{ $match: { _id: { $in: event.members } } },
 						{
 							$addFields: {
 								numEvents: {
+									// gets the number of events attended prior to the event
 									$size: {
 										$filter: {
 											input: '$events',
@@ -215,79 +267,84 @@ router.get('/event/:id', async (req, res, next) => {
 								}
 							}
 						},
-						{ $group: { _id: { numEvents: '$numEvents' }, count: { $sum: 1 } } },
+						{ $group: { _id: '$numEvents', count: { $sum: 1 } } },
+						{ $sort: { _id: 1 } }
+					],
+					membersCurrentEventAttendance: [
+						{ $match: { _id: { $in: event.members } } },
+						{ $group: { _id: { $size: '$events' }, count: { $sum: 1 } } },
 						{ $sort: { _id: 1 } }
 					]
 				}
 			}
-		]).exec();
+		])
+			.exec()
+			.then(result => {
+				// turns the resulting array into an object;
+				result = { ...result[0] };
 
-		// format the response
-		const majorData = {
-			CS: 0,
-			CIT: 0,
-			FYE: 0,
-			ECE: 0,
-			EE: 0,
-			Math: 0,
-			CGT: 0,
-			ME: 0,
-			Other: 0
-		};
-		const majorsAggregationResult = result[0].major;
+				// Creates an object with keys = major, and value = # people in said major
+				result.majors = result.majors.reduce((majorData, majorAggregationResult) => {
+					const individualWords = majorAggregationResult._id.split(' ');
+					let majorName = '';
 
-		for (const major of majorsAggregationResult) {
-			// Format the major name to be the first letters of every word
-			// if the major is more than two words
-			// ex: Computer Science -> CS
-			const individualWords = major._id.split(' ');
-			if (individualWords.length >= 2) {
-				let shortenedMajorName = '';
-				for (const word of individualWords) {
-					shortenedMajorName += word[0];
-				}
+					if (individualWords.length >= 2) {
+						for (const word of individualWords) {
+							majorName += word[0];
+						}
+					} else {
+						majorName = majorAggregationResult._id;
+					}
 
-				majorData[shortenedMajorName] = major.count;
-			} else {
-				majorData[major._id] = major.count;
-			}
-		}
+					return { ...majorData, [majorName]: majorAggregationResult.count };
+				}, {});
 
-		// format the response
-		const classData = {
-			2022: 0,
-			2021: 0,
-			2020: 0,
-			2019: 0
-		};
-		const classAggregationResult = result[0].class;
+				// Creates an object with keys = grade, and value = # people in said grade
+				result.grades = result.grades.reduce(
+					(gradeData, gradeAggregationResult) => ({
+						...gradeData,
+						[gradeAggregationResult._id]: gradeAggregationResult.count
+					}),
+					{}
+				);
 
-		for (const classElement of classAggregationResult) {
-			classData[classElement._id] = classElement.count;
-		}
+				// Creates an object with keys = # events attended, and value = # people who attended said # events
+				result.membersEventAttendancePriorToTheEvent = result.membersEventAttendancePriorToTheEvent.reduce(
+					(
+						membersEventAttendancePriorToTheEventData,
+						membersEventAttendancePriorToTheEventAggregationResult
+					) => ({
+						...membersEventAttendancePriorToTheEventData,
+						[membersEventAttendancePriorToTheEventAggregationResult._id]:
+							membersEventAttendancePriorToTheEventAggregationResult.count
+					}),
+					{}
+				);
 
-		const membersEventAttendanceData = {};
-		const membersEventAttendanceAggregationResult = result[0].membersEventAttendance;
+				result.membersCurrentEventAttendance = result.membersCurrentEventAttendance.reduce(
+					(
+						membersCurrentEventAttendanceData,
+						membersCurrentEventAttendanceAggregationResult
+					) => ({
+						...membersCurrentEventAttendanceData,
+						[membersCurrentEventAttendanceAggregationResult._id]:
+							membersCurrentEventAttendanceAggregationResult.count
+					}),
+					{}
+				);
 
-		for (const eventAttendance of membersEventAttendanceAggregationResult) {
-			if (eventAttendance._id.numEvents >= 10) {
-				if (!membersEventAttendanceData['>10']) {
-					membersEventAttendanceData['>10'] = eventAttendance.count;
-				} else {
-					membersEventAttendanceData['>10'] += eventAttendance.count;
-				}
-			} else {
-				membersEventAttendanceData[eventAttendance._id.numEvents] = eventAttendance.count;
-			}
-		}
+				return result;
+			});
 
 		return successRes(res, {
-			eventName,
-			majorData,
-			classData,
-			membersEventAttendanceData
+			eventName: event.name,
+			majors,
+			grades,
+			membersEventAttendancePriorToTheEvent,
+			membersCurrentEventAttendance
 		});
 	} catch (error) {
+		console.log(error);
 		return errorRes(res, 500, error);
 	}
 });

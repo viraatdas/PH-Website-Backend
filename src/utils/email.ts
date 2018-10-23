@@ -15,9 +15,7 @@ export const sendResetEmail = async (member: IMemberModel) => {
 	await member.save();
 
 	const url =
-		CONFIG.NODE_ENV !== 'production'
-			? 'http://localhost:3000'
-			: 'https://purduehackers.com';
+		CONFIG.NODE_ENV !== 'production' ? 'http://localhost:3000' : 'https://purduehackers.com';
 
 	return await (sendGrid as any).send({
 		templateId: 'd-97ab2e626dbe4e32bcf0ccb7b719cd97',
@@ -31,11 +29,7 @@ export const sendResetEmail = async (member: IMemberModel) => {
 	});
 };
 
-
-export const sendAccountCreatedEmail = async (
-	member: IMemberModel,
-	event: IEventModel
-) => {
+export const sendAccountCreatedEmail = async (member: IMemberModel, event: IEventModel) => {
 	const token = jwt.sign({ id: member._id }, CONFIG.SECRET, {
 		expiresIn: '2 days'
 	});
@@ -43,9 +37,7 @@ export const sendAccountCreatedEmail = async (
 	await member.save();
 
 	const url =
-		CONFIG.NODE_ENV !== 'production'
-			? 'http://localhost:3000'
-			: 'https://purduehackers.com';
+		CONFIG.NODE_ENV !== 'production' ? 'http://localhost:3000' : 'https://purduehackers.com';
 
 	return await (sendGrid as any).send({
 		templateId: 'd-d27b542ca1ba49cfa335c84ca4d4f97a',

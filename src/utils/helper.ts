@@ -17,5 +17,16 @@ export const generateUser = () => {
 	};
 };
 
-export const generateUsers = numUsers =>
-	Array.from({ length: numUsers }, generateUser);
+export const generateEvent = () => {
+	const name = faker.hacker.noun();
+	const eventTime = faker.date.past();
+	const location = faker.address.streetAddress();
+	return {
+		name,
+		eventTime,
+		location
+	};
+};
+
+export const generateUsers = numUsers => Array.from({ length: numUsers }, generateUser);
+export const generateEvents = numEvents => Array.from({ length: numEvents }, generateEvent);

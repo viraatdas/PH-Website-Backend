@@ -413,5 +413,6 @@ describe('Report Route Tests', () => {
 	});
 
 	afterEach(() => server.mongoose.connection.dropDatabase());
+
 	afterAll(() => server.mongoose.disconnect());
 });

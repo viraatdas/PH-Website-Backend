@@ -68,7 +68,10 @@ router.get('/members', async (req, res, next) => {
 								}
 							},
 							{
-								$group: { _id: { month: '$month', year: '$year' }, count: { $sum: 1 } }
+								$group: {
+									_id: { month: '$month', year: '$year' },
+									count: { $sum: 1 }
+								}
 							},
 							// sort from oldest to newest
 							{ $sort: { '_id.year': 1, '_id.month': 1 } }

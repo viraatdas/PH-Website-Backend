@@ -183,12 +183,14 @@ router.put('/:id', auth(), multer.any(), async (req, res) => {
 		if (facebook && !/(facebook|fb)/.test(facebook))
 			return errorRes(res, 400, 'Invalid Facebook URL');
 		if (github && !/github/.test(github)) return errorRes(res, 400, 'Invalid GitHub URL');
-		if (linkedin && !/linkedin/.test(linkedin)) return errorRes(res, 400, 'Invalid LinkedIn URL');
+		if (linkedin && !/linkedin/.test(linkedin))
+			return errorRes(res, 400, 'Invalid LinkedIn URL');
 		if (devpost && !/devpost/.test(devpost)) return errorRes(res, 400, 'Invalid Devpost URL');
 		if (website && !isURL(website)) return errorRes(res, 400, 'Invalid website URL');
 		const member = await Member.findById(req.params.id, '+password').exec();
 		if (!member) return errorRes(res, 400, 'Member not found');
-		if (!compareSync(password, member.password)) return errorRes(res, 401, 'Incorrect password');
+		if (!compareSync(password, member.password))
+			return errorRes(res, 401, 'Incorrect password');
 
 		const picture = files.find(file => file.fieldname === 'picture');
 		const resume = files.find(file => file.fieldname === 'resume');
@@ -328,7 +330,9 @@ router.get('/:id/events', async (req, res) => {
 			.exec();
 		if (!member) return successRes(res, []);
 		const { events } = member;
-		const publicEvents = events ? events.filter((event: IEventModel) => !event.privateEvent) : [];
+		const publicEvents = events
+			? events.filter((event: IEventModel) => !event.privateEvent)
+			: [];
 		return successRes(res, publicEvents);
 	} catch (error) {
 		console.error(error);

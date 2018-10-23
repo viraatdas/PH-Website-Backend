@@ -3,7 +3,7 @@ import * as sendGrid from '@sendgrid/mail';
 import CONFIG from '../config';
 import { IEventModel } from '../models/event';
 import { IMemberModel } from '../models/member';
-import { formatDate } from './';
+import { formatDate } from '.';
 
 sendGrid.setApiKey(CONFIG.SENDGRID_KEY);
 

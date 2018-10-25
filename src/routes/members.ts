@@ -125,22 +125,14 @@ router.put('/:id', auth(), multer.any(), async (req, res) => {
 		const files: Express.Multer.File[] = req.files
 			? (req.files as Express.Multer.File[])
 			: new Array<Express.Multer.File>();
-<<<<<<< HEAD
-=======
 
-		console.log('req.body', req.body);
-
->>>>>>> c4605a360c37458b5b5e481adcd71c1bebb99581
 		const {
 			name,
 			email,
 			password,
 			passwordConfirm,
 			graduationYear,
-<<<<<<< HEAD
-=======
 			createdAt,
->>>>>>> c4605a360c37458b5b5e481adcd71c1bebb99581
 			privateProfile,
 			unsubscribed,
 			phone,
@@ -157,10 +149,6 @@ router.put('/:id', auth(), multer.any(), async (req, res) => {
 		if (!name) return errorRes(res, 400, 'Please provide your first and last name');
 		if (!email) return errorRes(res, 400, 'Please provide your email');
 		if (!isEmail(email)) return errorRes(res, 400, 'Invalid email');
-<<<<<<< HEAD
-=======
-		console.log('PASSWORD: ', password);
->>>>>>> c4605a360c37458b5b5e481adcd71c1bebb99581
 		if (!password) return errorRes(res, 400, 'A password is required');
 		if (!passwordConfirm) return errorRes(res, 400, 'Please confirm your password');
 		if (!graduationYear || !parseInt(graduationYear, 10))
@@ -221,10 +209,6 @@ router.put('/:id', auth(), multer.any(), async (req, res) => {
 		member.description = description;
 		member.devpost = devpost;
 		member.resumeLink = resumeLink;
-<<<<<<< HEAD
-=======
-		member.createdAt = createdAt;
->>>>>>> c4605a360c37458b5b5e481adcd71c1bebb99581
 
 		await member.save();
 		const m = member.toJSON();

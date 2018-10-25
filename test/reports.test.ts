@@ -1,25 +1,18 @@
 import 'jest';
-<<<<<<< HEAD
-import * as supertest from 'supertest';
-import Server from '../src/server';
-=======
 import Server from '../src/server';
 import * as supertest from 'supertest';
 import { generateUsers, generateEvent } from '../src/utils/helper';
 import { IMemberModel } from '../src/models/member';
 import { Event, IEventModel } from '../src/models/event';
 import { Member } from '../src/models/member';
->>>>>>> c4605a360c37458b5b5e481adcd71c1bebb99581
 
 let server: Server;
 let request: supertest.SuperTest<supertest.Test>;
 
-<<<<<<< HEAD
-=======
-// TODO: Fix all errors
+// TODO: Change all :any's
 
-const signUpUsers = async members =>
-	await Promise.all<{ user: IMemberModel; token: string }>(
+const signUpUsers = members =>
+	Promise.all<{ user: IMemberModel; token: string }>(
 		members.map(u =>
 			request
 				.post('/api/auth/signup')
@@ -28,16 +21,12 @@ const signUpUsers = async members =>
 		)
 	);
 
->>>>>>> c4605a360c37458b5b5e481adcd71c1bebb99581
 describe('Report Route Tests', () => {
 	beforeAll(() =>
 		Server.createInstance()
 			.then(s => (server = s))
 			.then(s => (request = supertest(s.app))));
 
-<<<<<<< HEAD
-	describe();
-=======
 	describe('Members Report Route Tests', () => {
 		it('Succesfully returns the major distribution of members', async () => {
 			const members: any = generateUsers(6);
@@ -426,5 +415,4 @@ describe('Report Route Tests', () => {
 	afterEach(() => server.mongoose.connection.dropDatabase());
 
 	afterAll(() => server.mongoose.disconnect());
->>>>>>> c4605a360c37458b5b5e481adcd71c1bebb99581
 });

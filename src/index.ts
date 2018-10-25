@@ -1,6 +1,6 @@
 import Server from './server';
 import CONFIG from './config';
-const { PORT, DB } = CONFIG;
+const { PORT } = CONFIG;
 
 const start = async () => {
 	try {

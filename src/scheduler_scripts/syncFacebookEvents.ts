@@ -6,15 +6,22 @@ import Server from '../../src/server';
 let server: Server;
 const accessToken = CONFIG.FACEBOOK_ACCESS_TOKEN;
 
+
+//TODO: Event in facebook that's deleted after bieng made and already in db but then deleted from facebook
 const syncFacebookEvents = async () => {
 	// Get all upcoming facebook events id's
 	try {
 		server = await Server.createInstance();
-		const { data } = await axios.get(
+		const { data: {data: upcomingEvents} } = await axios.get(
 			`https://graph.facebook.com/purduehackers/events?time_filter=upcoming&access_token=${accessToken}`
 		);
 
-		const upcomingEvents = data.data;
+		// const upcomingEvents = data;
+
+		/*upcomingEvents.forEach(e => {
+			
+		});
+		*/
 		for (const currEvent of upcomingEvents) {
 			const {
 				id: facebookId,

@@ -6,64 +6,88 @@ import Server from '../../src/server';
 let server: Server;
 const accessToken = CONFIG.FACEBOOK_ACCESS_TOKEN;
 
+const { NODE_ENV } = CONFIG;
 
-//TODO: Event in facebook that's deleted after bieng made and already in db but then deleted from facebook
+const getUpcomingFacebookEvents = async () => {
+	const {
+		data: { data: upcomingEvents }
+	} = await axios.get(
+		`https://graph.facebook.com/purduehackers/events?time_filter=upcoming&access_token=${accessToken}`
+	);
+	return upcomingEvents;
+};
+
+const updateDatabase = async upcomingEvents => {
+	const upcomingEventsInTheDatabaseFacebookLinks = await Event.find(
+		{ eventTime: { $gte: new Date() } },
+		'_id facebook'
+	)
+		.exec()
+		.then((result: any) => (result = result.map(event => event.facebook)));
+
+	for (const currEvent of upcomingEvents) {
+		const {
+			id: facebookId,
+			name: eventName,
+			place: { name: eventLocation },
+			start_time: eventTime
+		} = currEvent;
+
+		const facebook = `https://www.facebook.com/events/${facebookId}`;
+		if (!upcomingEventsInTheDatabaseFacebookLinks.includes(facebook)) {
+			// Create db event
+			const event = new Event({
+				name: eventName,
+				location: eventLocation,
+				privateEvent: false,
+				eventTime,
+				facebook
+			});
+
+			await event.save();
+			console.log('Created Event');
+		} else {
+			// Update event
+			await Event.findOneAndUpdate(
+				{
+					facebook
+				},
+				{
+					$set: {
+						name: eventName,
+						location: eventLocation,
+						privateEvent: false,
+						eventTime,
+						facebook
+					}
+				}
+			).exec();
+			console.log('Updated event');
+		}
+		// remove the event from the upcoming facebook events in db list
+		upcomingEventsInTheDatabaseFacebookLinks.splice(
+			upcomingEventsInTheDatabaseFacebookLinks.indexOf(facebook),
+			1
+		);
+	}
+
+	// Reflect facebook event deletions in the database
+	if (upcomingEventsInTheDatabaseFacebookLinks.length > 0) {
+		for (const currEventInTheDatabaseFacebookLink of upcomingEventsInTheDatabaseFacebookLinks) {
+			await Event.findOneAndDelete({
+				facebook: { $eq: currEventInTheDatabaseFacebookLink }
+			}).exec();
+			console.log('Deleted event');
+		}
+	}
+};
+
 const syncFacebookEvents = async () => {
 	// Get all upcoming facebook events id's
 	try {
 		server = await Server.createInstance();
-		const { data: {data: upcomingEvents} } = await axios.get(
-			`https://graph.facebook.com/purduehackers/events?time_filter=upcoming&access_token=${accessToken}`
-		);
-
-		// const upcomingEvents = data;
-
-		/*upcomingEvents.forEach(e => {
-			
-		});
-		*/
-		for (const currEvent of upcomingEvents) {
-			const {
-				id: facebookId,
-				name: eventName,
-				place: { name: eventLocation },
-				start_time: eventTime
-			} = currEvent;
-
-			const mongoEvent = await Event.findOne({
-				facebook: `https://www.facebook.com/events/${facebookId}/`
-			}).exec();
-
-			// New Facebook event
-			if (!mongoEvent) {
-				// Create db event
-				const event = new Event({
-					name: eventName,
-					location: eventLocation,
-					privateEvent: false,
-					eventTime,
-					facebook: `https://www.facebook.com/events/${facebookId}/`
-				});
-
-				await event.save();
-			} else {
-				// Update event
-				await Event.findOneAndUpdate(
-					{
-						facebook: `https://www.facebook.com/events/${facebookId}/`
-					},
-					{
-						$set: {
-							name: eventName,
-							location: eventLocation,
-							privateEvent: false,
-							eventTime,
-							facebook: `https://www.facebook.com/events/${facebookId}/`
-						}
-					}
-				).exec();
-			}
-		}
+		const upcomingEvents = await getUpcomingFacebookEvents();
+		await updateDatabase(upcomingEvents);
 	} catch (error) {
 		console.log('Error, ', error);
 	} finally {
@@ -71,4 +95,10 @@ const syncFacebookEvents = async () => {
 	}
 };
 
-syncFacebookEvents();
+if (!(NODE_ENV === 'test')) {
+	syncFacebookEvents();
+}
+
+// export this test function that will allow the test file to simply enter fake facebook events
+// to test mainly the database functions. This way tests will be permanent
+export const testSyncFacebookEvents = updateDatabase;

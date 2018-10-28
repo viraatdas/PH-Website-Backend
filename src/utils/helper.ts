@@ -28,5 +28,23 @@ export const generateEvent = () => {
 	};
 };
 
+const spoofFacebookEvent = () => {
+	const startTime = faker.date.future();
+	const name = faker.hacker.noun();
+	const place = {
+		name: faker.address.city()
+	};
+
+	// dont set id, just in case two events generate the same random number
+	return {
+		name,
+		place,
+		start_time: startTime
+	};
+};
+
+export const spoofFacebookEvents = numEvents =>
+	Array.from({ length: numEvents }, (v, i) => ({ ...spoofFacebookEvent(), id: i }));
+
 export const generateUsers = numUsers => Array.from({ length: numUsers }, generateUser);
 export const generateEvents = numEvents => Array.from({ length: numEvents }, generateEvent);

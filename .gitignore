@@ -71,3 +71,10 @@ purduehackers.json
 # app.yaml
 
 .DS_Store
+
+# Google Calendar
+credentials.json
+gCalToken.json
+src/scheduler_scripts/gcalPractice.ts
+src/scheduler_scripts/gcalSetup.ts
+src/scheduler_scripts/test.ts

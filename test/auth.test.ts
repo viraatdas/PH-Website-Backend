@@ -1,3 +1,4 @@
+import 'jest';
 import * as supertest from 'supertest';
 import Server from '../src/server';
 import { generateUser } from '../src/utils/helper';
@@ -53,9 +54,7 @@ describe('Auth route tests', () => {
 				status
 			} = await request.post('/api/auth/signup').send(newUser);
 			expect(status).toEqual(400);
-			expect(error).toEqual(
-				'A password longer than 5 characters is required'
-			);
+			expect(error).toEqual('A password longer than 5 characters is required');
 		});
 
 		it('Fails because password not confirmed', async () => {
@@ -99,7 +98,9 @@ describe('Auth route tests', () => {
 				status: statusCode
 			} = await request.post('/api/auth/signup').send(generatedUser);
 			expect(statusCode).toEqual(400);
-			expect(error).toEqual('An account already exists with that email. Please use your Purdue Hackers account password if you have one');
+			expect(error).toEqual(
+				'An account already exists with that email. Please use your Purdue Hackers account password if you have one'
+			);
 		});
 
 		it('Successfully creates a user', async () => {

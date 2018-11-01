@@ -18,7 +18,8 @@ const config = {
 	ORG_NAME: env.ORG_NAME || 'Purdue Hackers',
 	EMAIL: env.EMAIL || 'your@email.com',
 	GC_BUCKET: env.GC_BUCKET || 'mybucket',
-	SENDGRID_KEY: env.SENDGRID_KEY || 'sendgridkey'
+	SENDGRID_KEY: env.SENDGRID_KEY || 'sendgridkey',
+	FACEBOOK_ACCESS_TOKEN: env.FACEBOOK_ACCESS_TOKEN || ''
 };
 
 export default config;

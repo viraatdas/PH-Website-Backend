@@ -1,12 +1,12 @@
 import { Document, Schema, model } from 'mongoose';
-import { IMemberModel } from './member';
+import { IMemberDocument } from './member';
 
 export interface ILocationModel extends Document {
 	loc: any;
 	name: string;
 	city: string;
 	members: {
-		member: IMemberModel;
+		member: IMemberDocument;
 		dateStart: Date;
 		dateEnd: Date;
 	}[];

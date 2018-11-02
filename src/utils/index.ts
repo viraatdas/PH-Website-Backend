@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import { ObjectId } from 'mongodb';
 import * as GoogleCloudStorage from '@google-cloud/storage';
 import * as Multer from 'multer';
-import { IMemberModel, Member } from '../models/member';
+import { IMemberDocument, Member, MemberDto } from '../models/member';
 import { Permission, IPermissionModel } from '../models/permission';
 import CONFIG from '../config';
 export * from './email';
@@ -22,6 +22,8 @@ export const multer = Multer({
 });
 
 export const successRes = (res: Response, response: any) => res.json({ status: 200, response });
+
+export const success = (response: any) => ({ status: 200, response });
 
 export const errorRes = (res: Response, status: number, error: any) =>
 	res.status(status).json({
@@ -77,7 +79,7 @@ export function to<T, U = any>(
 export const uploadToStorage = async (
 	file: Express.Multer.File,
 	folder: string,
-	user: IMemberModel
+	user: MemberDto
 ) => {
 	if (!file) return 'No image file';
 	else if (folder === 'pictures' && !file.originalname.match(/\.(jpg|jpeg|png|gif)$/i))
@@ -151,7 +153,7 @@ export const addMemberToPermission = async (member, permission, user) =>
 	]);
 
 export const addMemberToPermissions = async (
-	member: IMemberModel,
+	member: IMemberDocument,
 	permissions: IPermissionModel[],
 	user
 ) => {

@@ -1,7 +1,7 @@
 import { Event } from '../models/event';
 import CONFIG from '../config';
 import axios from 'axios';
-import Server from '../../src/server';
+import Server from '../server';
 
 let server: Server;
 const accessToken = CONFIG.FACEBOOK_ACCESS_TOKEN;
@@ -11,9 +11,12 @@ const { NODE_ENV } = CONFIG;
 const getUpcomingFacebookEvents = async () => {
 	const {
 		data: { data: upcomingEvents }
-	} = await axios.get(
-		`https://graph.facebook.com/purduehackers/events?time_filter=upcoming&access_token=${accessToken}`
-	);
+	} = await axios.get('https://graph.facebook.com/purduehackers/events', {
+		params: {
+			time_filter: 'upcoming',
+			access_token: accessToken
+		}
+	});
 	return upcomingEvents;
 };
 
@@ -45,7 +48,7 @@ const updateDatabase = async upcomingEvents => {
 			});
 
 			await event.save();
-			console.log('Created Event');
+			// console.log('Created Event');
 		} else {
 			// Update event
 			await Event.findOneAndUpdate(
@@ -95,7 +98,7 @@ const syncFacebookEvents = async () => {
 	}
 };
 
-if (!(NODE_ENV === 'test')) {
+if (NODE_ENV !== 'test') {
 	syncFacebookEvents();
 }
 

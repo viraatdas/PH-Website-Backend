@@ -2,7 +2,7 @@ import * as passport from 'passport';
 import { Strategy, ExtractJwt } from 'passport-jwt';
 import { Request, Response, NextFunction } from 'express';
 import CONFIG from '../config';
-import { Member, IMemberModel } from '../models/member';
+import { Member, IMemberDocument } from '../models/member';
 import { Permission } from '../models/permission';
 import { errorRes, hasPermission } from '../utils';
 
@@ -20,7 +20,7 @@ passport.deserializeUser(async (id, done) => {
 			})
 			.exec();
 		console.log('Passport serialize user:', user);
-		done(null, user as IMemberModel);
+		done(null, user as IMemberDocument);
 	} catch (error) {
 		done(error, undefined);
 	}

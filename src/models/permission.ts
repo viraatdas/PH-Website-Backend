@@ -1,12 +1,12 @@
 import { Document, Schema, model } from 'mongoose';
-import { IMemberModel } from './member';
+import { IMemberDocument } from './member';
 
 export interface IPermissionModel extends Document {
 	name: string;
 	description: string;
 	members: {
-		member: IMemberModel;
-		recordedBy: IMemberModel;
+		member: IMemberDocument;
+		recordedBy: IMemberDocument;
 		dateAdded: Date;
 	}[];
 }

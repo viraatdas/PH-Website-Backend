@@ -10,6 +10,7 @@ import * as yes from 'yes-https';
 import { join, resolve } from 'path';
 import CONFIG from './config';
 import passportMiddleWare, { extractUser } from './middleware/passport';
+import { globalError } from './middleware/globalError';
 import { router as auth } from './routes/auth';
 import { router as home } from './routes/home';
 import { router as members } from './routes/members';
@@ -21,8 +22,18 @@ import { router as permissions } from './routes/permissions';
 import { router as autocomplete } from './routes/autocomplete';
 import { router as reports } from './routes/reports';
 
+import { useExpressServer } from 'routing-controllers';
+
 import { errorRes } from './utils';
+import { AuthController } from './routes/auth.controller';
+import { SuccessInterceptor } from './interceptors/success.interceptor';
 const { NODE_ENV, DB } = CONFIG;
+
+const ObjectId = mongoose.Types.ObjectId;
+
+ObjectId.prototype.valueOf = function() {
+	return this.toString();
+};
 
 export default class Server {
 	public static async createInstance() {
@@ -31,10 +42,36 @@ export default class Server {
 		return server;
 	}
 	public app: express.Application;
+	public controllerApp: express.Application;
 	public mongoose: typeof mongoose;
 
 	private constructor() {
 		this.app = express();
+		const controllerServer = express();
+		controllerServer.use(helmet());
+		if (NODE_ENV === 'production') controllerServer.use(yes());
+		if (NODE_ENV !== 'test')
+			NODE_ENV !== 'production'
+				? controllerServer.use(logger('dev'))
+				: controllerServer.use(logger('tiny'));
+		controllerServer.use(express.json());
+		controllerServer.use(express.urlencoded({ extended: true }));
+		controllerServer.use(cookieParser());
+		controllerServer.use(passportMiddleWare(passport).initialize());
+		controllerServer.use(cors());
+		controllerServer.use(extractUser());
+		controllerServer.use(express.static(join(__dirname, '../frontend/build')));
+
+		this.controllerApp = useExpressServer(controllerServer, {
+			cors: true,
+			defaultErrorHandler: false,
+			validation: true,
+			controllers: [AuthController],
+			interceptors: [SuccessInterceptor]
+		});
+
+		this.controllerApp.use(globalError);
+		this.controllerApp.listen(8080);
 		this.setup();
 	}
 
@@ -75,10 +112,7 @@ export default class Server {
 		);
 
 		// Any unhandled errors will be caught in this middleware
-		this.app.use((err, req, res, next) => {
-			console.error('Caught error:', err.message);
-			errorRes(res, 500, err.message);
-		});
+		this.app.use(globalError);
 	}
 
 	private async mongoSetup() {

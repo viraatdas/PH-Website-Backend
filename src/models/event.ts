@@ -1,5 +1,5 @@
 import { Document, Schema, model } from 'mongoose';
-import { IMemberModel } from './member';
+import { IMemberDocument } from './member';
 
 export interface IEventModel extends Document {
 	name: string;
@@ -7,7 +7,7 @@ export interface IEventModel extends Document {
 	facebook: string;
 	eventTime: Date;
 	privateEvent: boolean;
-	members: IMemberModel[];
+	members: IMemberDocument[];
 	createdAt: Date;
 	updatedAt: Date;
 }

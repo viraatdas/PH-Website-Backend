@@ -1,133 +1,104 @@
 import * as express from 'express';
+import { Request, Response } from 'express';
 import { ObjectId } from 'mongodb';
 import { isEmail, isMobilePhone, isURL } from 'validator';
 import * as jwt from 'jsonwebtoken';
 import CONFIG from '../config';
-import { Member } from '../models/member';
+import { Member, MemberDto } from '../models/member';
 import { Permission } from '../models/permission';
 import { auth } from '../middleware/passport';
 import { successRes, errorRes, multer, uploadToStorage, sendResetEmail } from '../utils';
+import {
+	JsonController,
+	Post,
+	Req,
+	Res,
+	UseBefore,
+	Body,
+	UseAfter,
+	BadRequestError,
+	UnauthorizedError
+} from 'routing-controllers';
+import { ValidationMiddleware } from '../middleware/validation';
+import { IsEmail } from 'class-validator';
 
 export const router = express.Router();
 
-router.post('/signup', multer.any(), async (req, res, next) => {
-	try {
+@JsonController('/auth')
+@UseAfter(ValidationMiddleware)
+export class AuthController {
+	@Post('/signup')
+	@UseBefore(multer.any())
+	async signup(@Req() req: Request, @Body() member: MemberDto) {
+		const { passwordConfirm } = req.body;
 		const files: Express.Multer.File[] = req.files
 			? (req.files as Express.Multer.File[])
 			: new Array<Express.Multer.File>();
-		const {
-			name,
-			email,
-			password,
-			passwordConfirm,
-			privateProfile,
-			unsubscribed,
-			phone,
-			major,
-			facebook,
-			gender,
-			github,
-			linkedin,
-			website,
-			description,
-			devpost,
-			resumeLink
-		} = req.body;
+
+		if (!passwordConfirm) throw new BadRequestError('Please confirm your password');
+		if (passwordConfirm !== member.password)
+			throw new BadRequestError('Passwords did not match');
+		member.graduationYear = Number(member.graduationYear);
 		const maxYear = new Date().getFullYear() + 20;
-		const graduationYear = parseInt(req.body.graduationYear, 10);
-		if (!name) return errorRes(res, 400, 'Please provide your first and last name');
-		if (!email) return errorRes(res, 400, 'Please provide your email');
-		if (!isEmail(email)) return errorRes(res, 400, 'Invalid email');
-		if (!graduationYear) return errorRes(res, 400, 'Please provide a valid graduation year');
-		if (graduationYear < 1869 || graduationYear > maxYear)
-			return errorRes(
-				res,
-				400,
+		if (member.graduationYear < 1869 || member.graduationYear > maxYear)
+			throw new BadRequestError(
 				`Graduation year must be a number between 1869 and ${maxYear}`
 			);
-		if (!password || password.length < 5)
-			return errorRes(res, 400, 'A password longer than 5 characters is required');
-		if (!passwordConfirm) return errorRes(res, 400, 'Please confirm your password');
-		if (passwordConfirm !== password) return errorRes(res, 400, 'Passwords did not match');
-		if (
-			gender &&
-			gender !== 'Male' &&
-			gender !== 'Female' &&
-			gender !== 'Other' &&
-			gender !== 'No'
-		)
-			return errorRes(res, 400, 'Please provide a valid gender');
-		if (
-			major &&
-			major !== 'Computer Science' &&
-			major !== 'Computer Graphics Technology' &&
-			major !== 'Computer Information Technology' &&
-			major !== 'Electrical Computer Engineering' &&
-			major !== 'Electrical Engineering' &&
-			major !== 'First Year Engineering' &&
-			major !== 'Math' &&
-			major !== 'Mechanical Engineering' &&
-			major !== 'Other'
-		)
-			return errorRes(res, 400, 'Please provide a valid major');
-		if (phone && !isMobilePhone(phone, ['en-US'] as any))
-			return errorRes(res, 400, 'Invalid phone number: ' + phone);
-		if (facebook && !/(facebook|fb)/.test(facebook))
-			return errorRes(res, 400, 'Invalid Facebook URL');
-		if (github && !/github/.test(github)) return errorRes(res, 400, 'Invalid GitHub URL');
-		if (linkedin && !/linkedin/.test(linkedin))
-			return errorRes(res, 400, 'Invalid LinkedIn URL');
-		if (devpost && !/devpost/.test(devpost)) return errorRes(res, 400, 'Invalid Devpost URL');
-		if (website && !isURL(website)) return errorRes(res, 400, 'Invalid website URL');
 
-		let user = await Member.findOne({ email }).exec();
-		if (user)
-			return errorRes(
-				res,
-				400,
-				'An account already exists with that email. Please use your Purdue Hackers account password if you have one'
-			);
+		member.privateProfile = Boolean(member.privateProfile);
+		member.unsubscribed = Boolean(member.unsubscribed);
 
 		const picture = files.find(file => file.fieldname === 'picture');
 		const resume = files.find(file => file.fieldname === 'resume');
 
-		user = new Member({
-			name,
-			email,
-			password,
-			graduationYear
-		});
+		if (picture) member.picture = await uploadToStorage(picture, 'pictures', member);
+		if (resume) member.resume = await uploadToStorage(resume, 'resumes', member);
 
-		// if (picture)
-		// 	user.picture = await uploadToStorage(picture, 'pictures', user);
-		// if (resume) user.resume = await uploadToStorage(resume, 'resumes', user);
-		user.privateProfile = privateProfile;
-		user.unsubscribed = unsubscribed;
-		user.phone = phone;
-		user.major = major;
-		user.facebook = facebook;
-		user.gender = gender;
-		user.github = github;
-		user.linkedin = linkedin;
-		user.website = website;
-		user.description = description;
-		user.devpost = devpost;
-		user.resumeLink = resumeLink;
-
-		// await user.save();
+		const user = new Member(member);
+		await user.save();
 		const u = user.toJSON();
 		delete u.password;
-		console.log('User ID:', u._id instanceof ObjectId);
 		const token = jwt.sign(u, CONFIG.SECRET, { expiresIn: '7 days' });
-		return successRes(res, {
+		return {
 			user: u,
 			token
-		});
-	} catch (error) {
-		console.error(error);
-		return errorRes(res, 500, error);
+		};
 	}
-});
+
+	@Post('/login')
+	async login(@Req() req, @Body() body: { email: string; password: string }) {
+		const { email, password } = body;
+		const user = await Member.findOne({ email }, '+password')
+			.populate({ path: 'permissions', model: Permission })
+			.exec();
+
+		console.log('Body', body);
+		if (!user) throw new UnauthorizedError('Member not found');
+
+		// Check if password matches
+		if (!user.comparePassword(password)) throw new UnauthorizedError('Wrong password');
+
+		const u = user.toJSON();
+		delete u.password;
+
+		// If user is found and password is right create a token
+		const token = jwt.sign(
+			{
+				_id: u._id,
+				name: u.name,
+				email: u.email,
+				graduationYear: u.graduationYear
+			},
+			CONFIG.SECRET,
+			{ expiresIn: '7 days' }
+		);
+
+		return {
+			user: u,
+			token
+		};
+	}
+}
 
 router.post('/login', async (req, res) => {
 	const { email, password } = req.body;

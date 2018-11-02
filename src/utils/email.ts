@@ -2,12 +2,12 @@ import * as jwt from 'jsonwebtoken';
 import * as sendGrid from '@sendgrid/mail';
 import CONFIG from '../config';
 import { IEventModel } from '../models/event';
-import { IMemberModel } from '../models/member';
+import { IMemberDocument } from '../models/member';
 import { formatDate } from '.';
 
 sendGrid.setApiKey(CONFIG.SENDGRID_KEY);
 
-export const sendResetEmail = async (member: IMemberModel) => {
+export const sendResetEmail = async (member: IMemberDocument) => {
 	const token = jwt.sign({ id: member._id }, CONFIG.SECRET, {
 		expiresIn: '2 days'
 	});
@@ -29,7 +29,7 @@ export const sendResetEmail = async (member: IMemberModel) => {
 	});
 };
 
-export const sendAccountCreatedEmail = async (member: IMemberModel, event: IEventModel) => {
+export const sendAccountCreatedEmail = async (member: IMemberDocument, event: IEventModel) => {
 	const token = jwt.sign({ id: member._id }, CONFIG.SECRET, {
 		expiresIn: '2 days'
 	});

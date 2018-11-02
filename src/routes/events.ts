@@ -3,7 +3,7 @@ import * as express from 'express';
 import { isEmail } from 'validator';
 import { ObjectId } from 'mongodb';
 import { Event } from '../models/event';
-import { Member, IMemberModel } from '../models/member';
+import { Member, IMemberDocument } from '../models/member';
 import { auth, hasPermissions } from '../middleware/passport';
 import {
 	successRes,
@@ -157,7 +157,7 @@ router.post('/:id/checkin', async (req, res, next) => {
 			})
 			.exec();
 		if (!event) return errorRes(res, 400, 'Event does not exist');
-		let member: IMemberModel = null;
+		let member: IMemberDocument = null;
 
 		// Search by memberID
 		if (memberID) {

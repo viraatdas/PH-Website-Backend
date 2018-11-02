@@ -4,12 +4,19 @@ import { IEventModel } from './event';
 import { IPermissionModel } from './permission';
 import { IJobModel } from './job';
 import { ILocationModel } from './location';
-
-export const memberStatuses = {
-	MEMBER: 'Member',
-	ALUMNI: 'Alumni',
-	INACTIVE: 'Inactive'
-};
+import {
+	IsEmail,
+	IsEnum,
+	Matches,
+	MinLength,
+	IsOptional,
+	IsMobilePhone,
+	IsIn,
+	IsUrl,
+	IsNumberString,
+	IsBooleanString
+} from 'class-validator';
+import { IsMemberAlreadyExist } from '../validators/memberExists';
 
 export const genders = {
 	MALE: 'Male',
@@ -18,42 +25,83 @@ export const genders = {
 	NO: 'No'
 };
 
-export interface IMemberModel extends Document {
+export const majors = [
+	'Computer Science',
+	'Computer Graphics Technology',
+	'Computer Information Technology',
+	'Electrical Computer Engineering',
+	'Electrical Engineering',
+	'First Year Engineering',
+	'Math',
+	'Mechanical Engineering',
+	'Other'
+];
+
+export class MemberDto {
+	@Matches(/([a-zA-Z]+ )+[a-zA-Z]+$/, { message: 'Please provide your first and last name' })
 	name: string;
+	@IsMemberAlreadyExist({ message: 'An account already exists with that email' })
+	@IsEmail({}, { message: 'Please provide a valid email address' })
 	email: string;
+	@IsNumberString({ message: 'Please provide a valid graduation year' })
 	graduationYear: number;
+	@MinLength(5, { message: 'A password longer than 5 characters is required' })
 	password: string;
-	memberStatus: string;
-	permissions: IPermissionModel[];
-	events: IEventModel[];
-	locations: {
+	permissions?: IPermissionModel[];
+	events?: IEventModel[];
+	locations?: {
 		location: ILocationModel;
 		dateStart: Date;
 		dateEnd: Date;
 	}[];
-	jobs: IJobModel[];
-	gender: string;
-	unsubscribed: boolean;
-	privateProfile: boolean;
-	phone: string;
-	setupEmailSent: Date;
-	major: string;
-	picture: string;
-	description: string;
-	facebook: string;
-	github: string;
-	linkedin: string;
-	devpost: string;
-	website: string;
-	resume: string;
-	resumeLink: string;
+	jobs?: IJobModel[];
+	@IsOptional()
+	@IsEnum(genders, { message: 'Please provide a valid gender' })
+	gender?: string;
+	@IsOptional()
+	@IsBooleanString()
+	unsubscribed?: boolean;
+	@IsOptional()
+	@IsBooleanString()
+	privateProfile?: boolean;
+	@IsOptional()
+	@IsMobilePhone('en-US', { message: 'Please provide a valid U.S. phone number' })
+	phone?: string;
+	setupEmailSent?: Date;
+	@IsOptional()
+	@IsIn(majors, { message: 'Please provide a valid major' })
+	major?: string;
+	picture?: string;
+	@IsOptional()
+	description?: string;
+	@IsOptional()
+	@Matches(/(facebook|fb)/, { message: 'Invalid Facebook URL' })
+	facebook?: string;
+	@IsOptional()
+	@Matches(/github/, { message: 'Invalid GitHub URL' })
+	github?: string;
+	@IsOptional()
+	@Matches(/linkedin/, { message: 'Invalid Linkedin URL' })
+	linkedin?: string;
+	@IsOptional()
+	@Matches(/devpost/, { message: 'Invalid Devpost URL' })
+	devpost?: string;
+	@IsOptional()
+	@IsUrl({}, { message: 'Invalid website URL' })
+	website?: string;
+	resume?: string;
+	resumeLink?: string;
 	createdAt: Date;
 	updatedAt: Date;
-	authenticatedAt: Date;
-	rememberToken: string;
-	resetPasswordToken: string;
-	comparePassword(password: string): boolean;
+	authenticatedAt?: Date;
+	rememberToken?: string;
+	resetPasswordToken?: string;
+	comparePassword(password: string) {
+		return bcrypt.compareSync(password, this.password);
+	}
 }
+
+export interface IMemberDocument extends MemberDto, Document {}
 
 const schema = new Schema(
 	{
@@ -74,11 +122,6 @@ const schema = new Schema(
 			type: String,
 			select: false,
 			default: ''
-		},
-		memberStatus: {
-			type: String,
-			enum: [...Object.values(memberStatuses)],
-			default: memberStatuses.MEMBER
 		},
 		gender: { type: String },
 		unsubscribed: {
@@ -134,7 +177,7 @@ const schema = new Schema(
 );
 
 schema.pre('save', async function(next) {
-	const member = this as IMemberModel;
+	const member = this as IMemberDocument;
 	if (member.isModified('password') || member.isNew) {
 		try {
 			const salt = await bcrypt.genSalt(10);
@@ -149,8 +192,8 @@ schema.pre('save', async function(next) {
 });
 
 schema.methods.comparePassword = function(password: string) {
-	const member = this as IMemberModel;
+	const member = this as IMemberDocument;
 	return bcrypt.compareSync(password, member.password);
 };
 
-export const Member = model<IMemberModel>('Member', schema, 'members');
+export const Member = model<IMemberDocument>('Member', schema, 'members');

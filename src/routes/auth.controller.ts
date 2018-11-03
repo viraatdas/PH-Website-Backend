@@ -80,7 +80,6 @@ export class AuthController {
 
 		// If user is found and password is right create a token
 		const token = jwt.sign({ _id: u._id }, CONFIG.SECRET, { expiresIn: '7 days' });
-		console.log('Sending response');
 		return {
 			user: u,
 			token

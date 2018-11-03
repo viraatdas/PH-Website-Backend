@@ -1,5 +1,4 @@
 import { Interceptor, InterceptorInterface, Action } from 'routing-controllers';
-import { ObjectID, ObjectId } from 'bson';
 
 @Interceptor()
 export class SuccessInterceptor implements InterceptorInterface {

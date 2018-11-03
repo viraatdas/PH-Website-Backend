@@ -55,6 +55,8 @@ export default class Server {
 			interceptors: [SuccessInterceptor],
 			currentUserChecker
 		});
+		// Any unhandled errors will be caught in this middleware
+		this.app.use(globalError);
 		this.setupRoutes();
 	}
 
@@ -69,7 +71,7 @@ export default class Server {
 		this.app.use(passportMiddleWare(passport).initialize());
 		this.app.use(cors());
 		this.app.use(extractUser());
-		this.app.use(express.static(join(__dirname, '../frontend/build')));
+		this.app.use(express.static(join(__dirname, '../../frontend/build')));
 	}
 
 	private setupRoutes() {
@@ -86,11 +88,11 @@ export default class Server {
 
 		// Serves react app, only used in production
 		this.app.get('*', (req, res) =>
-			res.sendFile(resolve(__dirname, '../frontend/build/index.html'))
+			res.sendFile(resolve(__dirname, '../../frontend/build/index.html'))
 		);
 
-		// Any unhandled errors will be caught in this middleware
-		this.app.use(globalError);
+		// // Any unhandled errors will be caught in this middleware
+		// this.app.use(globalError);
 	}
 
 	private async mongoSetup() {

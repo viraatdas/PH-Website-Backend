@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import { ObjectId } from 'mongodb';
 import * as GoogleCloudStorage from '@google-cloud/storage';
 import * as Multer from 'multer';
-import { IMemberDocument, Member, MemberDto } from '../models/member';
+import { IMemberModel, Member, MemberDto } from '../models/member';
 import { Permission, IPermissionModel } from '../models/permission';
 import CONFIG from '../config';
 export * from './email';
@@ -153,7 +153,7 @@ export const addMemberToPermission = async (member, permission, user) =>
 	]);
 
 export const addMemberToPermissions = async (
-	member: IMemberDocument,
+	member: IMemberModel,
 	permissions: IPermissionModel[],
 	user
 ) => {

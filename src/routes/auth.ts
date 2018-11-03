@@ -98,9 +98,8 @@ router.post('/signup', multer.any(), async (req, res, next) => {
 			graduationYear
 		});
 
-		// if (picture)
-		// 	user.picture = await uploadToStorage(picture, 'pictures', user);
-		// if (resume) user.resume = await uploadToStorage(resume, 'resumes', user);
+		if (picture) user.picture = await uploadToStorage(picture, 'pictures', user);
+		if (resume) user.resume = await uploadToStorage(resume, 'resumes', user);
 		user.privateProfile = privateProfile;
 		user.unsubscribed = unsubscribed;
 		user.phone = phone;
@@ -114,10 +113,9 @@ router.post('/signup', multer.any(), async (req, res, next) => {
 		user.devpost = devpost;
 		user.resumeLink = resumeLink;
 
-		// await user.save();
+		await user.save();
 		const u = user.toJSON();
 		delete u.password;
-		console.log('User ID:', u._id instanceof ObjectId);
 		const token = jwt.sign(u, CONFIG.SECRET, { expiresIn: '7 days' });
 		return successRes(res, {
 			user: u,

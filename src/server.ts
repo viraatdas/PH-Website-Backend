@@ -1,3 +1,4 @@
+import 'reflect-metadata';
 import * as express from 'express';
 import 'express-async-errors';
 import * as cookieParser from 'cookie-parser';
@@ -22,11 +23,13 @@ import { router as permissions } from './routes/permissions';
 import { router as autocomplete } from './routes/autocomplete';
 import { router as reports } from './routes/reports';
 
-import { useExpressServer } from 'routing-controllers';
+import { useExpressServer, Action } from 'routing-controllers';
 
 import { errorRes } from './utils';
 import { AuthController } from './routes/auth.controller';
 import { SuccessInterceptor } from './interceptors/success.interceptor';
+import { ExtractJwt } from 'passport-jwt';
+import { currentUserChecker } from './middleware/authentication';
 const { NODE_ENV, DB } = CONFIG;
 
 const ObjectId = mongoose.Types.ObjectId;
@@ -42,36 +45,36 @@ export default class Server {
 		return server;
 	}
 	public app: express.Application;
-	public controllerApp: express.Application;
 	public mongoose: typeof mongoose;
 
 	private constructor() {
 		this.app = express();
-		const controllerServer = express();
-		controllerServer.use(helmet());
-		if (NODE_ENV === 'production') controllerServer.use(yes());
-		if (NODE_ENV !== 'test')
-			NODE_ENV !== 'production'
-				? controllerServer.use(logger('dev'))
-				: controllerServer.use(logger('tiny'));
-		controllerServer.use(express.json());
-		controllerServer.use(express.urlencoded({ extended: true }));
-		controllerServer.use(cookieParser());
-		controllerServer.use(passportMiddleWare(passport).initialize());
-		controllerServer.use(cors());
-		controllerServer.use(extractUser());
-		controllerServer.use(express.static(join(__dirname, '../frontend/build')));
+		// const controllerServer = express();
+		// controllerServer.use(helmet());
+		// if (NODE_ENV === 'production') controllerServer.use(yes());
+		// if (NODE_ENV !== 'test')
+		// 	NODE_ENV !== 'production'
+		// 		? controllerServer.use(logger('dev'))
+		// 		: controllerServer.use(logger('tiny'));
+		// controllerServer.use(express.json());
+		// controllerServer.use(express.urlencoded({ extended: true }));
+		// controllerServer.use(cookieParser());
+		// controllerServer.use(passportMiddleWare(passport).initialize());
+		// controllerServer.use(cors());
+		// controllerServer.use(extractUser());
+		// controllerServer.use(express.static(join(__dirname, '../frontend/build')));
 
-		this.controllerApp = useExpressServer(controllerServer, {
+		this.app = useExpressServer(this.app, {
 			cors: true,
 			defaultErrorHandler: false,
 			validation: true,
 			controllers: [AuthController],
-			interceptors: [SuccessInterceptor]
+			interceptors: [SuccessInterceptor],
+			currentUserChecker
 		});
 
-		this.controllerApp.use(globalError);
-		this.controllerApp.listen(8080);
+		// this.controllerApp.use(globalError);
+		// this.controllerApp.listen(8080);
 		this.setup();
 	}
 
@@ -96,7 +99,7 @@ export default class Server {
 
 	private setupRoutes() {
 		this.app.use('/api', home);
-		this.app.use('/api/auth', auth);
+		// this.app.use('/api/auth', auth);
 		this.app.use('/api/members', members);
 		this.app.use('/api/events', events);
 		this.app.use('/api/jobs', jobs);

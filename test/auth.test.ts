@@ -32,7 +32,7 @@ describe('Auth route tests', () => {
 				status
 			} = await request.post('/api/auth/signup').send(newUser);
 			expect(status).toEqual(400);
-			expect(error).toEqual('Please provide your email');
+			expect(error).toEqual('Please provide a valid email address');
 		});
 
 		it('Fails because invalid email', async () => {
@@ -43,7 +43,7 @@ describe('Auth route tests', () => {
 				status
 			} = await request.post('/api/auth/signup').send(newUser);
 			expect(status).toEqual(400);
-			expect(error).toEqual('Invalid email');
+			expect(error).toEqual('Please provide a valid email address');
 		});
 
 		it('Fails because password is too short', async () => {
@@ -98,9 +98,7 @@ describe('Auth route tests', () => {
 				status: statusCode
 			} = await request.post('/api/auth/signup').send(generatedUser);
 			expect(statusCode).toEqual(400);
-			expect(error).toEqual(
-				'An account already exists with that email. Please use your Purdue Hackers account password if you have one'
-			);
+			expect(error).toEqual('An account already exists with that email');
 		});
 
 		it('Successfully creates a user', async () => {

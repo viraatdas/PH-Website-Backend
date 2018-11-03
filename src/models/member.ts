@@ -14,7 +14,8 @@ import {
 	IsIn,
 	IsUrl,
 	IsNumberString,
-	IsBooleanString
+	IsBooleanString,
+	IsNotEmpty
 } from 'class-validator';
 import { IsMemberAlreadyExist } from '../validators/memberExists';
 
@@ -41,9 +42,14 @@ export class MemberDto {
 	@Matches(/([a-zA-Z]+ )+[a-zA-Z]+$/, { message: 'Please provide your first and last name' })
 	name: string;
 	@IsMemberAlreadyExist({ message: 'An account already exists with that email' })
+	// @IsMemberAlreadyExist({
+	// 	message:
+	// 		'An account already exists with that email. Please use your Purdue Hackers account password if you have one'
+	// })
 	@IsEmail({}, { message: 'Please provide a valid email address' })
 	email: string;
-	@IsNumberString({ message: 'Please provide a valid graduation year' })
+	// @IsNumberString({ message: 'Please provide a valid graduation year' })
+	@IsNotEmpty()
 	graduationYear: number;
 	@MinLength(5, { message: 'A password longer than 5 characters is required' })
 	password: string;
@@ -101,7 +107,7 @@ export class MemberDto {
 	}
 }
 
-export interface IMemberDocument extends MemberDto, Document {}
+export interface IMemberModel extends MemberDto, Document {}
 
 const schema = new Schema(
 	{
@@ -177,7 +183,7 @@ const schema = new Schema(
 );
 
 schema.pre('save', async function(next) {
-	const member = this as IMemberDocument;
+	const member = this as IMemberModel;
 	if (member.isModified('password') || member.isNew) {
 		try {
 			const salt = await bcrypt.genSalt(10);
@@ -192,8 +198,8 @@ schema.pre('save', async function(next) {
 });
 
 schema.methods.comparePassword = function(password: string) {
-	const member = this as IMemberDocument;
-	return bcrypt.compareSync(password, member.password);
+	const member = this as IMemberModel;
+	return password && bcrypt.compareSync(password, member.password);
 };
 
-export const Member = model<IMemberDocument>('Member', schema, 'members');
+export const Member = model<IMemberModel>('Member', schema, 'members');

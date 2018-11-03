@@ -65,12 +65,11 @@ export class AuthController {
 	}
 
 	@Post('/login')
-	async login(@Req() req, @Body() body: { email: string; password: string }) {
+	async login(@Body() body: { email: string; password: string }) {
 		const { email, password } = body;
 		const user = await Member.findOne({ email }, '+password')
 			.populate({ path: 'permissions', model: Permission })
 			.exec();
-
 		if (!user) throw new UnauthorizedError('Member not found');
 
 		// Check if password matches
@@ -81,6 +80,7 @@ export class AuthController {
 
 		// If user is found and password is right create a token
 		const token = jwt.sign({ _id: u._id }, CONFIG.SECRET, { expiresIn: '7 days' });
+		console.log('Sending response');
 		return {
 			user: u,
 			token

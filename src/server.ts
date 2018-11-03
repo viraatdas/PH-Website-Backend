@@ -12,7 +12,7 @@ import { join, resolve } from 'path';
 import CONFIG from './config';
 import passportMiddleWare, { extractUser } from './middleware/passport';
 import { globalError } from './middleware/globalError';
-import { router as auth } from './routes/auth';
+// import { router as auth } from './routes/auth';
 import { router as home } from './routes/home';
 import { router as members } from './routes/members';
 import { router as events } from './routes/events';
@@ -23,20 +23,12 @@ import { router as permissions } from './routes/permissions';
 import { router as autocomplete } from './routes/autocomplete';
 import { router as reports } from './routes/reports';
 
-import { useExpressServer, Action } from 'routing-controllers';
+import { useExpressServer } from 'routing-controllers';
 
-import { errorRes } from './utils';
 import { AuthController } from './routes/auth.controller';
 import { SuccessInterceptor } from './interceptors/success.interceptor';
-import { ExtractJwt } from 'passport-jwt';
 import { currentUserChecker } from './middleware/authentication';
 const { NODE_ENV, DB } = CONFIG;
-
-const ObjectId = mongoose.Types.ObjectId;
-
-ObjectId.prototype.valueOf = function() {
-	return this.toString();
-};
 
 export default class Server {
 	public static async createInstance() {
@@ -49,21 +41,12 @@ export default class Server {
 
 	private constructor() {
 		this.app = express();
-		// const controllerServer = express();
-		// controllerServer.use(helmet());
-		// if (NODE_ENV === 'production') controllerServer.use(yes());
-		// if (NODE_ENV !== 'test')
-		// 	NODE_ENV !== 'production'
-		// 		? controllerServer.use(logger('dev'))
-		// 		: controllerServer.use(logger('tiny'));
-		// controllerServer.use(express.json());
-		// controllerServer.use(express.urlencoded({ extended: true }));
-		// controllerServer.use(cookieParser());
-		// controllerServer.use(passportMiddleWare(passport).initialize());
-		// controllerServer.use(cors());
-		// controllerServer.use(extractUser());
-		// controllerServer.use(express.static(join(__dirname, '../frontend/build')));
+		this.setup();
+	}
 
+	private setup(): void {
+		this.setupMiddleware();
+		// Enable controllers in this.app
 		this.app = useExpressServer(this.app, {
 			cors: true,
 			defaultErrorHandler: false,
@@ -72,14 +55,6 @@ export default class Server {
 			interceptors: [SuccessInterceptor],
 			currentUserChecker
 		});
-
-		// this.controllerApp.use(globalError);
-		// this.controllerApp.listen(8080);
-		this.setup();
-	}
-
-	private setup(): void {
-		this.setupMiddleware();
 		this.setupRoutes();
 	}
 

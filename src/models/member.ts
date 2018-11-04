@@ -42,13 +42,8 @@ export class MemberDto {
 	@Matches(/([a-zA-Z]+ )+[a-zA-Z]+$/, { message: 'Please provide your first and last name' })
 	name: string;
 	@IsMemberAlreadyExist({ message: 'An account already exists with that email' })
-	// @IsMemberAlreadyExist({
-	// 	message:
-	// 		'An account already exists with that email. Please use your Purdue Hackers account password if you have one'
-	// })
 	@IsEmail({}, { message: 'Please provide a valid email address' })
 	email: string;
-	// @IsNumberString({ message: 'Please provide a valid graduation year' })
 	@IsNotEmpty()
 	graduationYear: number;
 	@MinLength(5, { message: 'A password longer than 5 characters is required' })

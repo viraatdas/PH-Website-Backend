@@ -1,22 +1,23 @@
 import { Action, UnauthorizedError } from 'routing-controllers';
 import { ExtractJwt } from 'passport-jwt';
 import { decode, verify } from 'jsonwebtoken';
-import { Member, IMemberModel } from '../models/member';
+import { Member } from '../models/member';
 import { Permission } from '../models/permission';
 import { ObjectId } from 'bson';
 import CONFIG from '../config';
+import { hasPermission } from '../utils';
 
-export const currentUserChecker = async (action: Action, value?: any) => {
+export const currentUserChecker = async (action: Action) => {
 	const token = ExtractJwt.fromExtractors([
 		ExtractJwt.fromAuthHeaderAsBearerToken(),
 		ExtractJwt.fromBodyField('token'),
 		ExtractJwt.fromHeader('token'),
 		ExtractJwt.fromUrlQueryParameter('token')
 	])(action.request);
-	if (!token) return null;
+	if (!token || token === 'null' || token === 'undefined') return null;
 
 	try {
-		const valid = verify(token, CONFIG.SECRET);
+		verify(token, CONFIG.SECRET);
 	} catch (error) {
 		throw new UnauthorizedError('Invalid token');
 	}
@@ -32,4 +33,11 @@ export const currentUserChecker = async (action: Action, value?: any) => {
 		// .lean()
 		.exec();
 	return user;
+};
+
+export const authorizationChecker = async (action: Action, roles: string[]) => {
+	const user = await currentUserChecker(action);
+	if (!user) return false;
+	if (!roles.length) return true;
+	return roles.some(role => hasPermission(user, role));
 };

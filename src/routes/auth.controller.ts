@@ -44,6 +44,8 @@ export class AuthController {
 				`Graduation year must be a number between 1869 and ${maxYear}`
 			);
 
+		const exists = await Member.findOne({ email: member.email }).exec();
+
 		member.privateProfile = Boolean(member.privateProfile);
 		member.unsubscribed = Boolean(member.unsubscribed);
 

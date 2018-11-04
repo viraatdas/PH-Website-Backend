@@ -23,11 +23,14 @@ import { router as permissions } from './routes/permissions';
 import { router as autocomplete } from './routes/autocomplete';
 import { router as reports } from './routes/reports';
 
-import { useExpressServer } from 'routing-controllers';
+import { useExpressServer, Action } from 'routing-controllers';
 
 import { AuthController } from './routes/auth.controller';
 import { SuccessInterceptor } from './interceptors/success.interceptor';
-import { currentUserChecker } from './middleware/authentication';
+import { currentUserChecker, authorizationChecker } from './middleware/authentication';
+import { MemberController } from './routes/members.controller';
+import { hasPermission } from './utils';
+import { EventsController } from './routes/events.controller';
 const { NODE_ENV, DB } = CONFIG;
 
 export default class Server {
@@ -51,9 +54,10 @@ export default class Server {
 			cors: true,
 			defaultErrorHandler: false,
 			validation: true,
-			controllers: [AuthController],
+			controllers: [AuthController, MemberController, EventsController],
 			interceptors: [SuccessInterceptor],
-			currentUserChecker
+			currentUserChecker,
+			authorizationChecker
 		});
 		// Any unhandled errors will be caught in this middleware
 		this.app.use(globalError);
@@ -71,14 +75,13 @@ export default class Server {
 		this.app.use(passportMiddleWare(passport).initialize());
 		this.app.use(cors());
 		this.app.use(extractUser());
-		this.app.use(express.static(join(__dirname, '../../frontend/build')));
 	}
 
 	private setupRoutes() {
 		this.app.use('/api', home);
 		// this.app.use('/api/auth', auth);
-		this.app.use('/api/members', members);
-		this.app.use('/api/events', events);
+		// this.app.use('/api/members', members);
+		// this.app.use('/api/events', events);
 		this.app.use('/api/jobs', jobs);
 		this.app.use('/api/locations', locations);
 		this.app.use('/api/credentials', credentials);
@@ -86,12 +89,7 @@ export default class Server {
 		this.app.use('/api/autocomplete', autocomplete);
 		this.app.use('/api/report', reports);
 
-		// Serves react app, only used in production
-		this.app.get('*', (req, res) =>
-			res.sendFile(resolve(__dirname, '../../frontend/build/index.html'))
-		);
-
-		// // Any unhandled errors will be caught in this middleware
+		// Any unhandled errors will be caught in this middleware
 		// this.app.use(globalError);
 	}
 

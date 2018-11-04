@@ -94,6 +94,7 @@ export class EventsController {
 
 	// TODO: Change to put request
 	@Post('/:id')
+	@Authorized(['events'])
 	async updateEvent(@Req() req: Request) {
 		if (!ObjectId.isValid(req.params.id)) throw new BadRequestError('Invalid event ID');
 		const { name, privateEvent, eventTime, location, facebook } = req.body;
@@ -125,6 +126,7 @@ export class EventsController {
 	}
 
 	@Delete('/:id')
+	@Authorized(['events'])
 	async deleteEvent(@Req() req: Request) {
 		if (!ObjectId.isValid(req.params.id)) throw new BadRequestError('Invalid event ID');
 		const event = await Event.findById(req.params.id).exec();

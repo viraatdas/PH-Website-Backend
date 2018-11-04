@@ -201,6 +201,7 @@ export class EventsController {
 
 	// TODO: Checkout member based on their name and email
 	@Delete('/:id/checkin/:memberID')
+	@Authorized(['events'])
 	async checkout(@Req() req: Request) {
 		const { id, memberID } = req.params;
 		if (!ObjectId.isValid(id)) throw new BadRequestError('Invalid event ID');

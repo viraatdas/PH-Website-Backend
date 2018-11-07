@@ -41,7 +41,7 @@ export const majors = [
 export class MemberDto {
 	@Matches(/([a-zA-Z]+ )+[a-zA-Z]+$/, { message: 'Please provide your first and last name' })
 	name: string;
-	@IsMemberAlreadyExist({ message: 'An account already exists with that email' })
+	// @IsMemberAlreadyExist({ message: 'An account already exists with that email' })
 	@IsEmail({}, { message: 'Please provide a valid email address' })
 	email: string;
 	@IsNotEmpty()

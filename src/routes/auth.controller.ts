@@ -45,6 +45,7 @@ export class AuthController {
 			);
 
 		const exists = await Member.findOne({ email: member.email }).exec();
+		if (exists) throw new BadRequestError('An account already exists with that email');
 
 		member.privateProfile = Boolean(member.privateProfile);
 		member.unsubscribed = Boolean(member.unsubscribed);

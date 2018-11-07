@@ -10,6 +10,7 @@
 		"deploy": "yarn build && gcloud app deploy -q",
 		"server": "ts-node src/index.ts",
 		"test": "NODE_ENV=test jest -i",
+		"test:coverage": "NODE_ENV=test jest -i --coverage",
 		"postinstall": "yarn build",
 		"watch": "nodemon -e ts -w ./src -x npm run watch:serve",
 		"watch:serve": "ts-node src/index.ts"

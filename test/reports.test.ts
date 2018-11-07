@@ -153,7 +153,7 @@ describe('Report Route Tests', () => {
 		});
 
 		it('Succesfully returns the members event attendance', async () => {
-			const members: any = generateUsers(6);
+			const members = generateUsers(6);
 
 			// Register all of the users to the database
 			const signedUpUsers = await signUpUsers(members);

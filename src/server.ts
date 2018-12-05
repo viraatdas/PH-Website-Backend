@@ -12,10 +12,7 @@ import { join, resolve } from 'path';
 import CONFIG from './config';
 import passportMiddleWare, { extractUser } from './middleware/passport';
 import { globalError } from './middleware/globalError';
-// import { router as auth } from './routes/auth';
 import { router as home } from './routes/home';
-import { router as members } from './routes/members';
-import { router as events } from './routes/events';
 import { router as jobs } from './routes/jobs';
 import { router as locations } from './routes/locations';
 import { router as credentials } from './routes/credentials';
@@ -23,14 +20,13 @@ import { router as permissions } from './routes/permissions';
 import { router as autocomplete } from './routes/autocomplete';
 import { router as reports } from './routes/reports';
 
-import { useExpressServer, Action } from 'routing-controllers';
+import { useExpressServer } from 'routing-controllers';
 
-import { AuthController } from './routes/auth.controller';
+import { AuthController } from './controllers/auth.controller';
 import { SuccessInterceptor } from './interceptors/success.interceptor';
 import { currentUserChecker, authorizationChecker } from './middleware/authentication';
-import { MemberController } from './routes/members.controller';
-import { hasPermission } from './utils';
-import { EventsController } from './routes/events.controller';
+import { MemberController } from './controllers/members.controller';
+import { EventsController } from './controllers/events.controller';
 const { NODE_ENV, DB } = CONFIG;
 
 export default class Server {
@@ -54,7 +50,8 @@ export default class Server {
 			cors: true,
 			defaultErrorHandler: false,
 			validation: true,
-			controllers: [AuthController, MemberController, EventsController],
+			controllers: [__dirname + '/controllers/*.ts'],
+			// controllers: [AuthController, MemberController, EventsController],
 			interceptors: [SuccessInterceptor],
 			currentUserChecker,
 			authorizationChecker

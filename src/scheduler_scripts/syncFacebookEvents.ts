@@ -4,9 +4,8 @@ import axios from 'axios';
 import Server from '../server';
 
 let server: Server;
-const accessToken = CONFIG.FACEBOOK_ACCESS_TOKEN;
 
-const { NODE_ENV } = CONFIG;
+const { NODE_ENV, FACEBOOK_ACCESS_TOKEN: accessToken } = CONFIG;
 
 const getUpcomingFacebookEvents = async () => {
 	const {

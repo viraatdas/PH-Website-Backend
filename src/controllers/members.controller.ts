@@ -135,7 +135,9 @@ export class MemberController {
 			gender !== 'No'
 		)
 			throw new BadRequestError('Please provide a valid gender');
-		if (major && !majors.some(major)) throw new BadRequestError('Please provide a valid major');
+		console.log('Body:', req.body);
+		if (major && !majors.some(maj => maj === major))
+			throw new BadRequestError('Please provide a valid major');
 		if (phone && !isMobilePhone(phone, ['en-US'] as any))
 			throw new BadRequestError('Invalid phone number: ' + phone);
 		if (password !== passwordConfirm) throw new BadRequestError('Passwords does not match');

@@ -2,22 +2,13 @@ import * as express from 'express';
 import { Request } from 'express';
 // import * as paginate from 'express-paginate';
 import { ObjectId } from 'mongodb';
-import { isEmail, isMobilePhone, isURL } from 'validator';
-import { compareSync } from 'bcrypt';
+import { compareSync, compare } from 'bcrypt';
 import { Member, MemberDto, IMemberModel, majors } from '../models/member';
 import { Event, IEventModel } from '../models/event';
 import { Location } from '../models/location';
 import { Permission } from '../models/permission';
 import { Job } from '../models/job';
-import { auth, hasPermissions } from '../middleware/passport';
-import {
-	successRes,
-	errorRes,
-	memberMatches,
-	uploadToStorage,
-	multer,
-	addMemberToPermissions
-} from '../utils';
+import { memberMatches, uploadToStorage, multer, addMemberToPermissions } from '../utils';
 import {
 	JsonController,
 	Get,
@@ -85,99 +76,137 @@ export class MemberController {
 		return member;
 	}
 
+	// @Put('/:id')
+	// @UseBefore(multer.any())
+	// async updateById(
+	// 	@Req() req: Request,
+	// 	@Param('id') id: string,
+	// 	@CurrentUser({ required: true }) user: IMemberModel
+	// ) {
+	// 	if (!ObjectId.isValid(id)) throw new BadRequestError('Invalid member ID');
+	// 	if (!memberMatches(user, id))
+	// 		throw new UnauthorizedError('You are unauthorized to edit this profile');
+
+	// 	const files: Express.Multer.File[] = req.files
+	// 		? (req.files as Express.Multer.File[])
+	// 		: new Array<Express.Multer.File>();
+
+	// 	const {
+	// 		name,
+	// 		email,
+	// 		password,
+	// 		passwordConfirm,
+	// 		graduationYear,
+	// 		privateProfile,
+	// 		unsubscribed,
+	// 		phone,
+	// 		major,
+	// 		facebook,
+	// 		gender,
+	// 		github,
+	// 		linkedin,
+	// 		website,
+	// 		description,
+	// 		devpost,
+	// 		resumeLink
+	// 	} = req.body;
+
+	// 	// TODO: Check that name is first and last name
+	// 	if (!name) throw new BadRequestError('Please provide your first and last name');
+	// 	if (!email) throw new BadRequestError('Please provide your email');
+	// 	if (!isEmail(email)) throw new BadRequestError('Invalid email');
+	// 	if (!password) throw new BadRequestError('A password is required');
+	// 	if (!passwordConfirm) throw new BadRequestError('Please confirm your password');
+	// 	if (!graduationYear || !parseInt(graduationYear, 10))
+	// 		throw new BadRequestError('Please provide a valid graduation year');
+	// 	if (
+	// 		gender &&
+	// 		gender !== 'Male' &&
+	// 		gender !== 'Female' &&
+	// 		gender !== 'Other' &&
+	// 		gender !== 'No'
+	// 	)
+	// 		throw new BadRequestError('Please provide a valid gender');
+	// 	if (major && !majors.some(maj => maj === major))
+	// 		throw new BadRequestError('Please provide a valid major');
+	// 	if (phone && !isMobilePhone(phone, ['en-US'] as any))
+	// 		throw new BadRequestError('Invalid phone number: ' + phone);
+	// 	if (password !== passwordConfirm) throw new BadRequestError('Passwords does not match');
+	// 	if (facebook && !/(facebook|fb)/.test(facebook))
+	// 		throw new BadRequestError('Invalid Facebook URL');
+	// 	if (github && !/github/.test(github)) throw new BadRequestError('Invalid GitHub URL');
+	// 	if (linkedin && !/linkedin/.test(linkedin))
+	// 		throw new BadRequestError('Invalid LinkedIn URL');
+	// 	if (devpost && !/devpost/.test(devpost)) throw new BadRequestError('Invalid Devpost URL');
+	// 	if (website && !isURL(website)) throw new BadRequestError('Invalid website URL');
+	// 	const member = await Member.findById(id, '+password').exec();
+	// 	if (!member) throw new BadRequestError('Member not found');
+	// 	if (!compareSync(password, member.password))
+	// 		throw new UnauthorizedError('Incorrect password');
+
+	// 	const picture = files.find(file => file.fieldname === 'picture');
+	// 	const resume = files.find(file => file.fieldname === 'resume');
+	// 	if (picture) member.picture = await uploadToStorage(picture, 'pictures', member);
+	// 	if (resume) member.resume = await uploadToStorage(resume, 'resumes', member);
+	// 	member.name = name;
+	// 	member.email = email;
+	// 	member.password = password;
+	// 	member.graduationYear = parseInt(graduationYear, 10);
+	// 	member.privateProfile = privateProfile;
+	// 	member.unsubscribed = unsubscribed;
+	// 	member.phone = phone;
+	// 	member.major = major;
+	// 	member.facebook = facebook;
+	// 	member.gender = gender;
+	// 	member.github = github;
+	// 	member.linkedin = linkedin;
+	// 	member.website = website;
+	// 	member.description = description;
+	// 	member.devpost = devpost;
+	// 	member.resumeLink = resumeLink;
+
+	// 	await member.save();
+	// 	const m = member.toJSON();
+	// 	delete m.password;
+	// 	return m;
+	// }
+
 	@Put('/:id')
 	@UseBefore(multer.any())
 	async updateById(
 		@Req() req: Request,
 		@Param('id') id: string,
+		@Body() memberDto: MemberDto,
 		@CurrentUser({ required: true }) user: IMemberModel
 	) {
 		if (!ObjectId.isValid(id)) throw new BadRequestError('Invalid member ID');
 		if (!memberMatches(user, id))
 			throw new UnauthorizedError('You are unauthorized to edit this profile');
 
+		const { password, passwordConfirm } = req.body;
 		const files: Express.Multer.File[] = req.files
 			? (req.files as Express.Multer.File[])
 			: new Array<Express.Multer.File>();
 
-		const {
-			name,
-			email,
-			password,
-			passwordConfirm,
-			graduationYear,
-			privateProfile,
-			unsubscribed,
-			phone,
-			major,
-			facebook,
-			gender,
-			github,
-			linkedin,
-			website,
-			description,
-			devpost,
-			resumeLink
-		} = req.body;
-
-		// TODO: Check that name is first and last name
-		if (!name) throw new BadRequestError('Please provide your first and last name');
-		if (!email) throw new BadRequestError('Please provide your email');
-		if (!isEmail(email)) throw new BadRequestError('Invalid email');
 		if (!password) throw new BadRequestError('A password is required');
 		if (!passwordConfirm) throw new BadRequestError('Please confirm your password');
-		if (!graduationYear || !parseInt(graduationYear, 10))
-			throw new BadRequestError('Please provide a valid graduation year');
-		if (
-			gender &&
-			gender !== 'Male' &&
-			gender !== 'Female' &&
-			gender !== 'Other' &&
-			gender !== 'No'
-		)
-			throw new BadRequestError('Please provide a valid gender');
-		if (major && !majors.some(maj => maj === major))
-			throw new BadRequestError('Please provide a valid major');
-		if (phone && !isMobilePhone(phone, ['en-US'] as any))
-			throw new BadRequestError('Invalid phone number: ' + phone);
 		if (password !== passwordConfirm) throw new BadRequestError('Passwords does not match');
-		if (facebook && !/(facebook|fb)/.test(facebook))
-			throw new BadRequestError('Invalid Facebook URL');
-		if (github && !/github/.test(github)) throw new BadRequestError('Invalid GitHub URL');
-		if (linkedin && !/linkedin/.test(linkedin))
-			throw new BadRequestError('Invalid LinkedIn URL');
-		if (devpost && !/devpost/.test(devpost)) throw new BadRequestError('Invalid Devpost URL');
-		if (website && !isURL(website)) throw new BadRequestError('Invalid website URL');
-		const member = await Member.findById(id, '+password').exec();
-		if (!member) throw new BadRequestError('Member not found');
-		if (!compareSync(password, member.password))
-			throw new UnauthorizedError('Incorrect password');
+
+		memberDto.privateProfile = Boolean(memberDto.privateProfile);
+		memberDto.unsubscribed = Boolean(memberDto.unsubscribed);
 
 		const picture = files.find(file => file.fieldname === 'picture');
 		const resume = files.find(file => file.fieldname === 'resume');
-		if (picture) member.picture = await uploadToStorage(picture, 'pictures', member);
-		if (resume) member.resume = await uploadToStorage(resume, 'resumes', member);
-		member.name = name;
-		member.email = email;
-		member.password = password;
-		member.graduationYear = parseInt(graduationYear, 10);
-		member.privateProfile = privateProfile;
-		member.unsubscribed = unsubscribed;
-		member.phone = phone;
-		member.major = major;
-		member.facebook = facebook;
-		member.gender = gender;
-		member.github = github;
-		member.linkedin = linkedin;
-		member.website = website;
-		member.description = description;
-		member.devpost = devpost;
-		member.resumeLink = resumeLink;
+		if (picture) memberDto.picture = await uploadToStorage(picture, 'pictures', memberDto);
+		if (resume) memberDto.resume = await uploadToStorage(resume, 'resumes', memberDto);
 
-		await member.save();
-		const m = member.toJSON();
-		delete m.password;
-		return m;
+		let member = await Member.findById(id, '+password').exec();
+		if (!member) throw new BadRequestError('Member not found');
+		if (!(await compare(password, member.password)))
+			throw new UnauthorizedError('Incorrect password');
+
+		member = await Member.findByIdAndUpdate(id, memberDto, { new: true }).exec();
+		return member;
 	}
 
 	@Post('/organizer')

@@ -5,6 +5,7 @@ import { generateUsers } from '../../src/utils/helper';
 import { IMemberModel } from '../../src/models/member';
 import { AuthController } from '../../src/controllers/auth.controller';
 import { MemberController } from '../../src/controllers/members.controller';
+import { BadRequestError, UnauthorizedError } from 'routing-controllers';
 
 let server: Server;
 let authController: AuthController;
@@ -78,25 +79,96 @@ describe('Member controller unit tests', () => {
 	});
 
 	describe('Get a single user', () => {
-		it('Successfully updates a single user', async () => {
+		it('Fails to update a single user because invalid ID', async () => {
 			const generatedUser = generatedUsers.find(val => user.user.email === val.email);
 			const userUpdate = {
-				body: {
-					...user.user,
-					name: `${faker.name.firstName()} ${faker.name.lastName()}`,
-					password: generatedUser.password,
-					passwordConfirm: generatedUser.passwordConfirm
-				}
+				...user.user,
+				name: `${faker.name.firstName()} ${faker.name.lastName()}`
+			};
+
+			await expect(
+				memberController.updateById(
+					{
+						body: {
+							password: generatedUser.password,
+							passwordConfirm: generatedUser.passwordConfirm
+						}
+					} as any,
+					'InvalidID',
+					userUpdate as any,
+					user.user
+				)
+			).rejects.toEqual(new BadRequestError('Invalid member ID'));
+		});
+
+		it('Fails to update a single user because member does not exist', async () => {
+			const generatedUser = generatedUsers.find(val => user.user.email === val.email);
+			const userUpdate = {
+				...user.user,
+				name: `${faker.name.firstName()} ${faker.name.lastName()}`
+			};
+			const id = server.mongoose.Types.ObjectId().toHexString();
+			await expect(
+				memberController.updateById(
+					{
+						body: {
+							password: generatedUser.password,
+							passwordConfirm: generatedUser.passwordConfirm
+						}
+					} as any,
+					id,
+					userUpdate as any,
+					user.user
+				)
+			).rejects.toEqual(new UnauthorizedError('You are unauthorized to edit this profile'));
+		});
+
+		it('Successfully updates a single users name', async () => {
+			const generatedUser = generatedUsers.find(val => user.user.email === val.email);
+			const userUpdate = {
+				...user.user,
+				name: `${faker.name.firstName()} ${faker.name.lastName()}`
 			};
 			const u = await memberController.updateById(
-				userUpdate as any,
+				{
+					body: {
+						password: generatedUser.password,
+						passwordConfirm: generatedUser.passwordConfirm
+					}
+				} as any,
 				user.user._id,
+				userUpdate as any,
 				user.user
 			);
-			expect(u).not.toHaveProperty('password');
 			expect(u).toHaveProperty('_id');
+			expect(u.password).toEqual(undefined);
+			expect(u.email).toEqual(user.user.email);
 			expect(u.graduationYear).toEqual(user.user.graduationYear);
 			expect(u.name).not.toEqual(user.user.name);
+		});
+
+		it('Successfully updates a single users gender', async () => {
+			const generatedUser = generatedUsers.find(val => user.user.email === val.email);
+			const userUpdate = {
+				...user.user,
+				gender: 'Male'
+			};
+			const u = await memberController.updateById(
+				{
+					body: {
+						password: generatedUser.password,
+						passwordConfirm: generatedUser.passwordConfirm
+					}
+				} as any,
+				user.user._id,
+				userUpdate as any,
+				user.user
+			);
+			expect(u).toHaveProperty('_id');
+			expect(u.password).toEqual(undefined);
+			expect(u.email).toEqual(user.user.email);
+			expect(u.graduationYear).toEqual(user.user.graduationYear);
+			expect(u.gender).not.toEqual(user.user.gender);
 		});
 	});
 

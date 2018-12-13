@@ -1,7 +1,6 @@
 import 'jest';
 import { generateUser } from '../../src/utils/helper';
 import Server from '../../src/server';
-// import { AuthController } from '../../src/routes/auth.controller';
 import { AuthController } from '../../src/controllers/auth.controller';
 import { MemberDto } from '../../src/models/member';
 import { Request } from 'express';
@@ -28,7 +27,6 @@ describe('Auth controller unit tests', () => {
 			await expect(controller.signup(req as Request, member as any)).rejects.toEqual(
 				new BadRequestError('Please confirm your password')
 			);
-			console.log('Finished');
 			// const res = await controller.signup(req as Request, member as any);
 		});
 	});

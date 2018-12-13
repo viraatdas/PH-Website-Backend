@@ -41,7 +41,7 @@ import {
 @JsonController('/api/members')
 export class MemberController {
 	@Get('/')
-	async getAll(@QueryParam('sortBy') sortBy: string, @QueryParam('order') order: number) {
+	async getAll(@QueryParam('sortBy') sortBy?: string, @QueryParam('order') order?: number) {
 		order = order === 1 ? 1 : -1;
 		sortBy = sortBy || 'createdAt';
 
@@ -120,6 +120,7 @@ export class MemberController {
 			resumeLink
 		} = req.body;
 
+		// TODO: Check that name is first and last name
 		if (!name) throw new BadRequestError('Please provide your first and last name');
 		if (!email) throw new BadRequestError('Please provide your email');
 		if (!isEmail(email)) throw new BadRequestError('Invalid email');
@@ -135,7 +136,6 @@ export class MemberController {
 			gender !== 'No'
 		)
 			throw new BadRequestError('Please provide a valid gender');
-		console.log('Body:', req.body);
 		if (major && !majors.some(maj => maj === major))
 			throw new BadRequestError('Please provide a valid major');
 		if (phone && !isMobilePhone(phone, ['en-US'] as any))
@@ -148,7 +148,7 @@ export class MemberController {
 			throw new BadRequestError('Invalid LinkedIn URL');
 		if (devpost && !/devpost/.test(devpost)) throw new BadRequestError('Invalid Devpost URL');
 		if (website && !isURL(website)) throw new BadRequestError('Invalid website URL');
-		const member = await Member.findById(req.params.id, '+password').exec();
+		const member = await Member.findById(id, '+password').exec();
 		if (!member) throw new BadRequestError('Member not found');
 		if (!compareSync(password, member.password))
 			throw new UnauthorizedError('Incorrect password');

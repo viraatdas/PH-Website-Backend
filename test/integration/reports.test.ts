@@ -1,15 +1,13 @@
 import 'jest';
-import Server from '../src/server';
 import * as supertest from 'supertest';
-import { generateUsers, generateEvent } from '../src/utils/helper';
-import { IMemberModel } from '../src/models/member';
-import { Event, IEventModel } from '../src/models/event';
-import { Member } from '../src/models/member';
+import Server from '../../src/server';
+import { generateUsers, generateEvent } from '../../src/utils/helper';
+import { IMemberModel } from '../../src/models/member';
+import { Event, IEventModel } from '../../src/models/event';
+import { Member } from '../../src/models/member';
 
 let server: Server;
 let request: supertest.SuperTest<supertest.Test>;
-
-// TODO: Change all :any's
 
 const signUpUsers = members =>
 	Promise.all<{ user: IMemberModel; token: string }>(
@@ -23,9 +21,11 @@ const signUpUsers = members =>
 
 describe('Report Route Tests', () => {
 	beforeAll(() =>
-		Server.createInstance()
-			.then(s => (server = s))
-			.then(s => (request = supertest(s.app))));
+		Server.createInstance().then(s => {
+			server = s;
+			request = supertest(s.app);
+		})
+	);
 
 	describe('Members Report Route Tests', () => {
 		it('Succesfully returns the major distribution of members', async () => {

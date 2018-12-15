@@ -22,11 +22,11 @@ import { router as reports } from './routes/reports';
 
 import { useExpressServer } from 'routing-controllers';
 
-import { AuthController } from './controllers/auth.controller';
+// import { AuthController } from './controllers/auth.controller';
 import { SuccessInterceptor } from './interceptors/success.interceptor';
 import { currentUserChecker, authorizationChecker } from './middleware/authentication';
-import { MemberController } from './controllers/members.controller';
-import { EventsController } from './controllers/events.controller';
+// import { MemberController } from './controllers/members.controller';
+// import { EventsController } from './controllers/events.controller';
 const { NODE_ENV, DB } = CONFIG;
 
 export default class Server {
@@ -94,10 +94,9 @@ export default class Server {
 		try {
 			this.mongoose = await mongoose.connect(
 				DB,
-				{ useNewUrlParser: true }
+				{ useNewUrlParser: true, useCreateIndex: true }
 			);
 			this.mongoose.Promise = Promise;
-			console.log('Connected to Mongo:', DB);
 			return this.mongoose;
 		} catch (error) {
 			console.error('Error connecting to mongo:', error);

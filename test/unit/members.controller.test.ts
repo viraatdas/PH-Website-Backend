@@ -22,12 +22,12 @@ let user: { user: IMemberModel; token: string };
 
 describe('Member controller unit tests', () => {
 	beforeAll(() =>
-		Server.createInstance()
-			.then(s => (server = s))
-			.then(() => {
-				authController = new AuthController();
-				memberController = new MemberController();
-			}));
+		Server.createInstance().then(s => {
+			server = s;
+			authController = new AuthController();
+			memberController = new MemberController();
+		})
+	);
 
 	beforeEach(async () => {
 		generatedUsers = generateUsers(6);

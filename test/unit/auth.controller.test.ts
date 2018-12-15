@@ -2,7 +2,6 @@ import 'jest';
 import { generateUser } from '../../src/utils/helper';
 import Server from '../../src/server';
 import { AuthController } from '../../src/controllers/auth.controller';
-import { MemberDto } from '../../src/models/member';
 import { Request } from 'express';
 import { BadRequestError } from 'routing-controllers';
 
@@ -10,9 +9,11 @@ let server: Server;
 let controller: AuthController;
 describe('Auth controller unit tests', () => {
 	beforeAll(() =>
-		Server.createInstance()
-			.then(s => (server = s))
-			.then(() => (controller = new AuthController())));
+		Server.createInstance().then(s => {
+			server = s;
+			controller = new AuthController();
+		})
+	);
 
 	describe('Signup Tests', () => {
 		it('Successfully signs up', async () => {

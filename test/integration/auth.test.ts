@@ -1,16 +1,18 @@
 import 'jest';
 import * as supertest from 'supertest';
-import Server from '../src/server';
-import { generateUser } from '../src/utils/helper';
+import Server from '../../src/server';
+import { generateUser } from '../../src/utils/helper';
 
 let server: Server;
 let request: supertest.SuperTest<supertest.Test>;
 
 describe('Auth route tests', () => {
 	beforeAll(() =>
-		Server.createInstance()
-			.then(s => (server = s))
-			.then(s => (request = supertest(s.app))));
+		Server.createInstance().then(s => {
+			server = s;
+			request = supertest(s.app);
+		})
+	);
 
 	describe('Signup Tests', () => {
 		it('Fails because no name', async () => {

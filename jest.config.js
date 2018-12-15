@@ -1,4 +1,6 @@
 module.exports = {
+	globalSetup: './test/globals/setup',
+	globalTeardown: './test/globals/teardown',
 	globals: {
 		'ts-jest': {
 			tsConfig: 'tsconfig.json'
@@ -7,13 +9,7 @@ module.exports = {
 	moduleFileExtensions: ['ts', 'tsx', 'js', 'json'],
 	preset: 'ts-jest',
 	testEnvironment: 'node',
-	testMatch: [
-		'**/test/**/*.ts?(x)',
-		'**/?(*.)+(spec|test).ts?(x)',
-		'**/test/*.+(ts|tsx|js)',
-		'test/.*\\.(ts|tsx)$'
-	],
-	transform: {
-		'^.+\\.(ts|tsx)$': 'ts-jest'
-	}
+	// testEnvironment: '<rootDir>/test/setup',
+	testMatch: ['**/?(*.)+(spec|test).+(ts|tsx|js)?(x)'],
+	transform: { '^.+\\.(ts|tsx)$': 'ts-jest' }
 };

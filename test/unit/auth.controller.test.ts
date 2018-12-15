@@ -19,15 +19,22 @@ describe('Auth controller unit tests', () => {
 			const member = generateUser();
 			const req: Partial<Request> = {
 				body: {
-					// passwordConfirm: member.passwordConfirm
+					passwordConfirm: member.passwordConfirm
 				}
 			};
 
 			// expect.assertions(1);
-			await expect(controller.signup(req as Request, member as any)).rejects.toEqual(
-				new BadRequestError('Please confirm your password')
-			);
-			// const res = await controller.signup(req as Request, member as any);
+			// await expect(controller.signup(req as Request, member as any)).rejects.toEqual(
+			// 	new BadRequestError('Please confirm your password')
+			// );
+			const res = await controller.signup(req as Request, member as any);
+			expect(res.token).toBeTruthy();
+			expect(res.user).toBeTruthy();
+			expect(res.user).toHaveProperty('_id');
+			expect(res.user.password).toEqual(undefined);
+			expect(res.user.email).toEqual(member.email);
+			expect(res.user.graduationYear).toEqual(member.graduationYear);
+			expect(res.user.name).toEqual(member.name);
 		});
 	});
 

@@ -57,7 +57,7 @@ describe('Report Route Tests', () => {
 		});
 
 		it('Succesfully returns the class distribution of members', async () => {
-			const members: any = generateUsers(6);
+			const members = generateUsers(6);
 
 			members[1].graduationYear = 2019;
 			members[0].graduationYear = 2019;
@@ -83,7 +83,7 @@ describe('Report Route Tests', () => {
 		});
 
 		it('Succesfully returns the number of new members that joined every month', async () => {
-			const members: any = generateUsers(6);
+			const members = generateUsers(6);
 
 			// Register all of the users to the database
 			const signedUpUsers = await signUpUsers(members);
@@ -118,7 +118,7 @@ describe('Report Route Tests', () => {
 		});
 
 		it('Succesfully returns the number of members for each month', async () => {
-			const members: any = generateUsers(6);
+			const members = generateUsers(6);
 
 			// Register all of the users to the database
 			const signedUpUsers = await signUpUsers(members);
@@ -186,7 +186,7 @@ describe('Report Route Tests', () => {
 		});
 
 		it('Succesfully returns the event attendance per month', async () => {
-			const members: any = generateUsers(5);
+			const members = generateUsers(5);
 
 			// Register all of the users to the database
 			const signedUpUsersIds = await signUpUsers(members).then(signedUpUsers =>
@@ -237,9 +237,10 @@ describe('Report Route Tests', () => {
 
 	describe('Events Report Route Tests', () => {
 		it('Succesfully returns the event name', async () => {
+			const name = 'test';
 			const event = await new Event({
 				...generateEvent(),
-				name: 'test'
+				name
 			}).save();
 
 			const {
@@ -248,7 +249,7 @@ describe('Report Route Tests', () => {
 			} = await request.get(`/api/report/event/${event._id}`);
 
 			expect(status).toEqual(200);
-			expect(response.eventName).toBe('test');
+			expect(response.eventName).toBe(name);
 		});
 
 		it('Succesfully returns the major distribution of the members of an event', async () => {
@@ -285,7 +286,7 @@ describe('Report Route Tests', () => {
 		});
 
 		it('Succesfully returns the grade distribution of the members of an event', async () => {
-			const members: any = generateUsers(6);
+			const members = generateUsers(6);
 
 			members[1].graduationYear = 2019;
 			members[0].graduationYear = 2019;
@@ -316,7 +317,7 @@ describe('Report Route Tests', () => {
 		});
 
 		it('Succesfully returns the event attendance prior to the event of the members of an event', async () => {
-			const members: any = generateUsers(2);
+			const members = generateUsers(2);
 
 			// Register all of the users to the database
 			const signedUpUsers = await signUpUsers(members);
@@ -365,7 +366,7 @@ describe('Report Route Tests', () => {
 	});
 
 	it('Succesfully returns the current event attendance of the members of an event', async () => {
-		const members: any = generateUsers(2);
+		const members = generateUsers(2);
 
 		// Register all of the users to the database
 		const signedUpUsers = await signUpUsers(members);

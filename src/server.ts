@@ -94,7 +94,7 @@ export default class Server {
 		try {
 			this.mongoose = await mongoose.connect(
 				DB,
-				{ useNewUrlParser: true, useCreateIndex: true }
+				{ useNewUrlParser: true, useCreateIndex: true, useFindAndModify: false }
 			);
 			this.mongoose.Promise = Promise;
 			return this.mongoose;

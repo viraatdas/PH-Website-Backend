@@ -64,7 +64,7 @@ const updateDatabase = async upcomingEvents => {
 					}
 				}
 			).exec();
-			console.log('Updated event');
+			// console.log('Updated event');
 		}
 		// remove the event from the upcoming facebook events in db list
 		upcomingEventsInTheDatabaseFacebookLinks.splice(
@@ -79,7 +79,7 @@ const updateDatabase = async upcomingEvents => {
 			await Event.findOneAndDelete({
 				facebook: { $eq: currEventInTheDatabaseFacebookLink }
 			}).exec();
-			console.log('Deleted event');
+			// console.log('Deleted event');
 		}
 	}
 };

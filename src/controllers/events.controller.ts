@@ -17,11 +17,14 @@ import {
 	Param,
 	Delete
 } from 'routing-controllers';
+import { createLogger } from '../utils/logger';
 
 // TODO: Add auth to routes
 // TODO: Add permissions to routess
 @JsonController('/api/events')
 export class EventsController {
+	private readonly logger = createLogger(this);
+	
 	@Get('/')
 	async getAll(
 		@QueryParam('sortBy') sortBy: string,

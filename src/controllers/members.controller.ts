@@ -26,11 +26,14 @@ import {
 	Authorized,
 	Delete
 } from 'routing-controllers';
+import { createLogger } from '../utils/logger';
 
 // TODO: Add auth to routes
 // TODO: Add permissions to routes
 @JsonController('/api/members')
 export class MemberController {
+	private readonly logger = createLogger(this);
+
 	@Get('/')
 	async getAll(@QueryParam('sortBy') sortBy?: string, @QueryParam('order') order?: number) {
 		order = order === 1 ? 1 : -1;

@@ -1,6 +1,6 @@
 import 'jest';
 import * as faker from 'faker';
-import { generateUser } from '../../src/utils/helper';
+import { generateUser } from '../helper';
 import { MemberDto, genders, majors } from '../../src/models/member';
 import { validate, ValidationError } from 'class-validator';
 

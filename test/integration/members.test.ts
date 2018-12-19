@@ -1,7 +1,7 @@
 import 'jest';
 import * as supertest from 'supertest';
 import Server from '../../src/server';
-import { generateUsers } from '../../src/utils/helper';
+import { generateUsers } from '../helper';
 import { IMemberModel } from '../../src/models/member';
 
 let server: Server;

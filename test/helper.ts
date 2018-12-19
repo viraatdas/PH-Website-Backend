@@ -23,10 +23,15 @@ export const generateEvent = () => {
 	const name = faker.hacker.noun();
 	const eventTime = faker.date.past();
 	const location = faker.address.streetAddress();
+	const facebook = `https://www.facebook.com/events/${faker.random.number({
+		min: 100000000000000,
+		max: 999999999999999
+	})}/`;
 	return {
 		name,
 		eventTime,
-		location
+		location,
+		facebook
 	};
 };
 
@@ -37,7 +42,7 @@ const spoofFacebookEvent = () => {
 		name: faker.address.city()
 	};
 
-	// dont set id, just in case two events generate the same random number
+	// Don't set id, just in case two events generate the same random number
 	return {
 		name,
 		place,
@@ -45,8 +50,8 @@ const spoofFacebookEvent = () => {
 	};
 };
 
-export const spoofFacebookEvents = numEvents =>
+export const spoofFacebookEvents = (numEvents: number) =>
 	Array.from({ length: numEvents }, (v, i) => ({ ...spoofFacebookEvent(), id: i }));
-
-export const generateUsers = numUsers => Array.from({ length: numUsers }, generateUser);
-export const generateEvents = numEvents => Array.from({ length: numEvents }, generateEvent);
+export const generateUsers = (numUsers: number) => Array.from({ length: numUsers }, generateUser);
+export const generateEvents = (numEvents: number) =>
+	Array.from({ length: numEvents }, generateEvent);

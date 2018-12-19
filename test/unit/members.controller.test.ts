@@ -1,7 +1,7 @@
 import 'jest';
 import * as faker from 'faker';
 import Server from '../../src/server';
-import { generateUsers } from '../../src/utils/helper';
+import { generateUsers } from '../helper';
 import { IMemberModel } from '../../src/models/member';
 import { AuthController } from '../../src/controllers/auth.controller';
 import { MemberController } from '../../src/controllers/members.controller';

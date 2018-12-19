@@ -1,7 +1,7 @@
 import 'jest';
 import Server from '../../src/server';
 import * as supertest from 'supertest';
-import { spoofFacebookEvents } from '../../src/utils/helper';
+import { spoofFacebookEvents } from '../helper';
 import { testSyncFacebookEvents } from '../../src/scheduler_scripts/syncFacebookEvents';
 import { Event } from '../../src/models/event';
 

@@ -1,7 +1,7 @@
 import 'jest';
 import * as supertest from 'supertest';
 import Server from '../../src/server';
-import { generateUsers, generateEvent } from '../../src/utils/helper';
+import { generateUsers, generateEvent } from '../helper';
 import { IMemberModel } from '../../src/models/member';
 import { Event, IEventModel } from '../../src/models/event';
 import { Member } from '../../src/models/member';

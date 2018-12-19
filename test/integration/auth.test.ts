@@ -1,7 +1,7 @@
 import 'jest';
 import * as supertest from 'supertest';
 import Server from '../../src/server';
-import { generateUser } from '../../src/utils/helper';
+import { generateUser } from '../helper';
 
 let server: Server;
 let request: supertest.SuperTest<supertest.Test>;

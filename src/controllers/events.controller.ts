@@ -24,7 +24,7 @@ import { createLogger } from '../utils/logger';
 @JsonController('/api/events')
 export class EventsController {
 	private readonly logger = createLogger(this);
-	
+
 	@Get('/')
 	async getAll(
 		@QueryParam('sortBy') sortBy: string,
@@ -65,7 +65,7 @@ export class EventsController {
 		const { name, privateEvent, eventTime, location, facebook } = body;
 		if (!name) throw new BadRequestError('Event must have a name');
 		if (!eventTime) throw new BadRequestError('Event must have a time');
-		if (!location) throw new BadRequestError('Event must have a name');
+		if (!location) throw new BadRequestError('Event must have a location');
 		const time = Date.parse(eventTime);
 		if (isNaN(time)) throw new BadRequestError('Invalid event time');
 		if (facebook && !facebook.match('((http|https)://)?(www[.])?facebook.com.*'))
@@ -86,13 +86,13 @@ export class EventsController {
 	@Get('/:id')
 	async getById(@Param('id') id: string) {
 		if (!ObjectId.isValid(id)) throw new BadRequestError('Invalid event ID');
-		const user = await Event.findById(id)
+		const event = await Event.findById(id)
 			.populate({
 				path: 'members',
 				model: Member
 			})
 			.exec();
-		return user;
+		return event;
 	}
 
 	// TODO: Change to put request
@@ -105,7 +105,7 @@ export class EventsController {
 		if (!name) throw new BadRequestError('Event must have a name');
 		else Object.assign(eventBuilder, { name });
 		if (!eventTime) throw new BadRequestError('Event must have a time');
-		if (!location) throw new BadRequestError('Event must have a name');
+		if (!location) throw new BadRequestError('Event must have a location');
 		else Object.assign(eventBuilder, { location });
 		const time = Date.parse(eventTime);
 		if (isNaN(time)) throw new BadRequestError('Invalid event time');
@@ -124,8 +124,18 @@ export class EventsController {
 			.exec();
 		if (!event) throw new BadRequestError('Event does not exist');
 
-		await event.update(eventBuilder).exec();
-		return event.toJSON();
+		const updatedEvent = await Event.findByIdAndUpdate(req.params.id, eventBuilder, {
+			new: true
+		})
+			.populate({
+				path: 'members',
+				model: Member
+			})
+			.lean()
+			.exec();
+		// await event.update(eventBuilder).exec();
+		// return event.toJSON();
+		return updatedEvent;
 	}
 
 	@Delete('/:id')
@@ -161,7 +171,7 @@ export class EventsController {
 		// No ID, so search by name and email
 		if (!member) {
 			if (!name) throw new BadRequestError('Invalid name');
-			if (!isEmail(email)) throw new BadRequestError('Invalid email');
+			if (!email || !isEmail(email)) throw new BadRequestError('Invalid email');
 			const m = await Member.findOne({
 				name,
 				email

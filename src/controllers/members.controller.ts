@@ -1,7 +1,7 @@
 import { Request } from 'express';
 // import * as paginate from 'express-paginate';
 import { ObjectId } from 'mongodb';
-import { compare } from 'bcrypt';
+import { compare, compareSync } from 'bcrypt';
 import { Member, MemberDto, IMemberModel, majors } from '../models/member';
 import { Event, IEventModel } from '../models/event';
 import { Location } from '../models/location';
@@ -85,6 +85,7 @@ export class MemberController extends BaseController {
 		@Body() memberDto: MemberDto,
 		@CurrentUser({ required: true }) user: IMemberModel
 	) {
+		this.logger.info('Receieved member:', memberDto);
 		if (!ObjectId.isValid(id)) throw new BadRequestError('Invalid member ID');
 		if (!memberMatches(user, id))
 			throw new UnauthorizedError('You are unauthorized to edit this profile');
@@ -114,7 +115,7 @@ export class MemberController extends BaseController {
 
 		let member = await Member.findById(id, '+password').exec();
 		if (!member) throw new BadRequestError('Member not found');
-		if (!(await compare(password, member.password)))
+		if (!member.comparePassword(password))
 			throw new UnauthorizedError('Incorrect password');
 
 		member = await Member.findByIdAndUpdate(id, memberDto, { new: true }).exec();

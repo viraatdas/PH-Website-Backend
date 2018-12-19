@@ -106,7 +106,8 @@ export class AuthController extends BaseController {
 		const token = jwt.sign({ id: member._id }, CONFIG.SECRET, { expiresIn: '2 days' });
 		member.resetPasswordToken = token;
 		await member.save();
-		await sendResetEmail(member);
+		const res = await sendResetEmail(member);
+		this.logger.info('Sent email:', res);
 		return `A link to reset your password has been sent to: ${email}`;
 	}
 

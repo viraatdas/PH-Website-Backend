@@ -48,8 +48,6 @@ describe('Suite: /api/events', () => {
 
 	describe('Create an event', () => {
 		it('Fails to create an event because no name', async () => {
-			// const user = await createUserWithEventCreationPermission();
-
 			const event = generateEvent();
 			delete event.name;
 
@@ -60,15 +58,12 @@ describe('Suite: /api/events', () => {
 				.post(`/api/events`)
 				.send(event)
 				.auth(user.token, { type: 'bearer' });
-			// .set('Authorization', `Bearer ${user.token}`);
 
 			expect(status).toEqual(400);
 			expect(error).toEqual('Event must have a name');
 		});
 
 		it('Fails to create an event because no time', async () => {
-			// const user = await createUserWithEventCreationPermission();
-
 			const event = generateEvent();
 			delete event.eventTime;
 
@@ -85,8 +80,6 @@ describe('Suite: /api/events', () => {
 		});
 
 		it('Fails to create an event because invalid time', async () => {
-			// const user = await createUserWithEventCreationPermission();
-
 			const event = generateEvent();
 			(event as any).eventTime = 'Invalid Date';
 
@@ -103,8 +96,6 @@ describe('Suite: /api/events', () => {
 		});
 
 		it('Fails to create an event because no location', async () => {
-			// const user = await createUserWithEventCreationPermission();
-
 			const event = generateEvent();
 			delete event.location;
 
@@ -121,8 +112,6 @@ describe('Suite: /api/events', () => {
 		});
 
 		it('Fails to create an event because of an invalid facebook link', async () => {
-			// const user = await createUserWithEventCreationPermission();
-
 			const event = generateEvent();
 			event.facebook = 'www.google.com';
 
@@ -139,7 +128,6 @@ describe('Suite: /api/events', () => {
 		});
 
 		it('Successfully creates an event', async () => {
-			// const user = await createUserWithEventCreationPermission();
 			const event = generateEvent();
 
 			const {
@@ -162,8 +150,6 @@ describe('Suite: /api/events', () => {
 		});
 
 		it('Successfully creates a private event', async () => {
-			// const user = await createUserWithEventCreationPermission();
-
 			const event = { ...generateEvent(), privateEvent: true };
 
 			const {
@@ -226,7 +212,6 @@ describe('Suite: /api/events', () => {
 		});
 
 		it('Returns all events (including private)', async () => {
-			// const user = await createUserWithEventCreationPermission();
 			const events = generateEvents(2);
 
 			await Promise.all([

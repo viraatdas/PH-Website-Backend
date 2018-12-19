@@ -67,12 +67,8 @@ export class EventsController extends BaseController {
 
 	@Post('/')
 	@Authorized(['events'])
-	async createEvent(
-		@Body()
-		body: EventDto
-	) {
+	async createEvent(@Body() body: EventDto) {
 		const event = new Event(body);
-
 		await event.save();
 		return event.toJSON();
 	}

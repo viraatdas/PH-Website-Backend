@@ -12,10 +12,11 @@ import {
 	IsOptional,
 	IsIn,
 	IsUrl,
-	IsMobilePhone,
-	IsNotEmpty
+	IsNotEmpty,
+	ValidateIf
 } from 'class-validator';
 import { IsPhoneNumber } from '../validators/phone';
+import { Exclude, Expose } from 'class-transformer';
 
 export const genders = {
 	MALE: 'Male',
@@ -36,62 +37,72 @@ export const majors = [
 	'Other'
 ];
 
+@Exclude()
 export class MemberDto {
 	@IsNotEmpty({ message: 'Please provide your first and last name' })
 	@Matches(/([a-zA-Z']+ )+[a-zA-Z']+$/, { message: 'Please provide your first and last name' })
+	@Expose()
 	name: string;
-	// @IsMemberAlreadyExist({ message: 'An account already exists with that email' })
 	@IsNotEmpty({ message: 'Please provide a valid email address' })
 	@IsEmail({}, { message: 'Please provide a valid email address' })
+	@Expose()
 	email: string;
 	@IsNotEmpty()
+	@Expose()
 	graduationYear: number;
-	@MinLength(5, { message: 'A password longer than 5 characters is required' })
+	@Exclude()
 	password: string;
-	permissions?: IPermissionModel[];
-	events?: IEventModel[];
-	locations?: {
-		location: ILocationModel;
-		dateStart: Date;
-		dateEnd: Date;
-	}[];
-	jobs?: IJobModel[];
 	@IsOptional()
 	@IsEnum(genders, { message: 'Please provide a valid gender' })
+	@Expose()
 	gender?: string;
 	@IsOptional()
+	@Expose()
 	unsubscribed?: boolean;
 	@IsOptional()
+	@Expose()
 	privateProfile?: boolean;
-	@IsOptional()
+	// @IsOptional()
+	@ValidateIf((obj, val) => obj[val] !== '' && obj[val] !== null && obj[val] !== undefined)
 	@IsPhoneNumber('USA', { message: 'Please provide a valid U.S. phone number' })
+	@Expose()
 	phone?: string;
 	setupEmailSent?: Date;
-	@IsOptional()
+	// @IsOptional()
+	@ValidateIf((obj, val) => obj[val] !== '' && obj[val] !== null && obj[val] !== undefined)
 	@IsIn(majors, { message: 'Please provide a valid major' })
+	@Expose()
 	major?: string;
+	@Expose()
 	picture?: string;
-	@IsOptional()
+	// @IsOptional()
+	@ValidateIf((obj, val) => obj[val] !== '' && obj[val] !== null && obj[val] !== undefined)
+	@Expose()
 	description?: string;
-	@IsOptional()
+	@ValidateIf((obj, val) => obj[val] !== '' && obj[val] !== null && obj[val] !== undefined)
 	@Matches(/(facebook|fb)/, { message: 'Invalid Facebook URL' })
+	@Expose()
 	facebook?: string;
-	@IsOptional()
+	@ValidateIf((obj, val) => obj[val] !== '' && obj[val] !== null && obj[val] !== undefined)
 	@Matches(/github/, { message: 'Invalid GitHub URL' })
+	@Expose()
 	github?: string;
-	@IsOptional()
+	@ValidateIf((obj, val) => obj[val] !== '' && obj[val] !== null && obj[val] !== undefined)
 	@Matches(/linkedin/, { message: 'Invalid Linkedin URL' })
+	@Expose()
 	linkedin?: string;
-	@IsOptional()
+	@ValidateIf((obj, val) => obj[val] !== '' && obj[val] !== null && obj[val] !== undefined)
 	@Matches(/devpost/, { message: 'Invalid Devpost URL' })
+	@Expose()
 	devpost?: string;
-	@IsOptional()
+	@ValidateIf((obj, val) => obj[val] !== '' && obj[val] !== null && obj[val] !== undefined)
 	@IsUrl({}, { message: 'Invalid website URL' })
+	@Expose()
 	website?: string;
+	@Expose()
 	resume?: string;
+	@Expose()
 	resumeLink?: string;
-	createdAt: Date;
-	updatedAt: Date;
 	authenticatedAt?: Date;
 	rememberToken?: string;
 	resetPasswordToken?: string;
@@ -100,7 +111,18 @@ export class MemberDto {
 	}
 }
 
-export interface IMemberModel extends MemberDto, Document {}
+export interface IMemberModel extends MemberDto, Document {
+	permissions?: IPermissionModel[];
+	events?: IEventModel[];
+	locations?: {
+		location: ILocationModel;
+		dateStart: Date;
+		dateEnd: Date;
+	}[];
+	jobs?: IJobModel[];
+	createdAt: Date;
+	updatedAt: Date;
+}
 
 const schema = new Schema(
 	{

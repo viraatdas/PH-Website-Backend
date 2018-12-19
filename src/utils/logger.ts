@@ -30,12 +30,12 @@ const transporters = context => [
 ];
 
 // tslint:disable-next-line:ban-types
-export const createLogger = (context: string | object | Function) => {
+export const createLogger = (context: string | object | (() => any)) => {
 	if (typeof context === 'object') context = context.constructor.name;
 	if (typeof context === 'function') context = context.name;
 	return createWinstonLogger({
 		transports: transporters(context),
-		silent: CONFIG.NODE_ENV === 'test'
+		// silent: CONFIG.NODE_ENV === 'test'
 	}).on('error', err => {
 		console.log('Logger Error:', err);
 	});

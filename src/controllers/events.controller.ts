@@ -1,7 +1,7 @@
 import { Request } from 'express';
 import { isEmail } from 'validator';
 import { ObjectId } from 'mongodb';
-import { Event } from '../models/event';
+import { Event, EventDto } from '../models/event';
 import { Member, IMemberModel } from '../models/member';
 import { sendAccountCreatedEmail, hasPermission } from '../utils';
 import {
@@ -15,16 +15,17 @@ import {
 	Body,
 	BadRequestError,
 	Param,
-	Delete
+	Delete,
+	UseAfter
 } from 'routing-controllers';
-import { createLogger } from '../utils/logger';
+import { BaseController } from './base.controller';
+import { ValidationMiddleware } from '../middleware/validation';
 
 // TODO: Add auth to routes
 // TODO: Add permissions to routess
 @JsonController('/api/events')
-export class EventsController {
-	private readonly logger = createLogger(this);
-
+@UseAfter(ValidationMiddleware)
+export class EventsController extends BaseController {
 	@Get('/')
 	async getAll(
 		@QueryParam('sortBy') sortBy: string,
@@ -52,37 +53,6 @@ export class EventsController {
 		return { events: results };
 	}
 
-	@Post('/')
-	@Authorized(['events'])
-	async createEvent(@Body()
-	body: {
-		name: string;
-		privateEvent: boolean;
-		eventTime: string;
-		location: string;
-		facebook: string;
-	}) {
-		const { name, privateEvent, eventTime, location, facebook } = body;
-		if (!name) throw new BadRequestError('Event must have a name');
-		if (!eventTime) throw new BadRequestError('Event must have a time');
-		if (!location) throw new BadRequestError('Event must have a location');
-		const time = Date.parse(eventTime);
-		if (isNaN(time)) throw new BadRequestError('Invalid event time');
-		if (facebook && !facebook.match('((http|https)://)?(www[.])?facebook.com.*'))
-			throw new BadRequestError('Must specify a url from Facebook');
-
-		const event = new Event({
-			name,
-			privateEvent: !!privateEvent,
-			eventTime: time,
-			location,
-			facebook
-		});
-
-		await event.save();
-		return event.toJSON();
-	}
-
 	@Get('/:id')
 	async getById(@Param('id') id: string) {
 		if (!ObjectId.isValid(id)) throw new BadRequestError('Invalid event ID');
@@ -93,6 +63,18 @@ export class EventsController {
 			})
 			.exec();
 		return event;
+	}
+
+	@Post('/')
+	@Authorized(['events'])
+	async createEvent(
+		@Body()
+		body: EventDto
+	) {
+		const event = new Event(body);
+
+		await event.save();
+		return event.toJSON();
 	}
 
 	// TODO: Change to put request

@@ -84,6 +84,24 @@ describe('Suite: /api/events', () => {
 			expect(error).toEqual('Event must have a time');
 		});
 
+		it('Fails to create an event because invalid time', async () => {
+			// const user = await createUserWithEventCreationPermission();
+
+			const event = generateEvent();
+			(event as any).eventTime = 'Invalid Date';
+
+			const {
+				body: { error },
+				status
+			} = await request
+				.post(`/api/events`)
+				.send(event)
+				.auth(user.token, { type: 'bearer' });
+
+			expect(status).toEqual(400);
+			expect(error).toEqual('Event must have a time');
+		});
+
 		it('Fails to create an event because no location', async () => {
 			// const user = await createUserWithEventCreationPermission();
 

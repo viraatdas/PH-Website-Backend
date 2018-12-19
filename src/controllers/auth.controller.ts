@@ -20,15 +20,13 @@ import {
 	CurrentUser
 } from 'routing-controllers';
 import { ValidationMiddleware } from '../middleware/validation';
-import { createLogger } from '../utils/logger';
+import { BaseController } from './base.controller';
 
 export const router = express.Router();
 
 @JsonController('/api/auth')
 @UseAfter(ValidationMiddleware)
-export class AuthController {
-	private readonly logger = createLogger(this);
-
+export class AuthController extends BaseController {
 	@Post('/signup')
 	@UseBefore(multer.any())
 	async signup(@Req() req: Request, @Body() member: MemberDto) {

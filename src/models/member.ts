@@ -10,14 +10,12 @@ import {
 	Matches,
 	MinLength,
 	IsOptional,
-	IsMobilePhone,
 	IsIn,
 	IsUrl,
-	IsNumberString,
-	IsBooleanString,
+	IsMobilePhone,
 	IsNotEmpty
 } from 'class-validator';
-import { IsMemberAlreadyExist } from '../validators/memberExists';
+import { IsPhoneNumber } from '../validators/phone';
 
 export const genders = {
 	MALE: 'Male',
@@ -39,9 +37,11 @@ export const majors = [
 ];
 
 export class MemberDto {
-	@Matches(/([a-zA-Z]+ )+[a-zA-Z]+$/, { message: 'Please provide your first and last name' })
+	@IsNotEmpty({ message: 'Please provide your first and last name' })
+	@Matches(/([a-zA-Z']+ )+[a-zA-Z']+$/, { message: 'Please provide your first and last name' })
 	name: string;
 	// @IsMemberAlreadyExist({ message: 'An account already exists with that email' })
+	@IsNotEmpty({ message: 'Please provide a valid email address' })
 	@IsEmail({}, { message: 'Please provide a valid email address' })
 	email: string;
 	@IsNotEmpty()
@@ -60,13 +60,11 @@ export class MemberDto {
 	@IsEnum(genders, { message: 'Please provide a valid gender' })
 	gender?: string;
 	@IsOptional()
-	@IsBooleanString()
 	unsubscribed?: boolean;
 	@IsOptional()
-	@IsBooleanString()
 	privateProfile?: boolean;
 	@IsOptional()
-	@IsMobilePhone('en-US', { message: 'Please provide a valid U.S. phone number' })
+	@IsPhoneNumber('USA', { message: 'Please provide a valid U.S. phone number' })
 	phone?: string;
 	setupEmailSent?: Date;
 	@IsOptional()

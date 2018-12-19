@@ -3,7 +3,9 @@ import * as faker from 'faker';
 export const generateUser = () => {
 	const first = faker.name.firstName();
 	const last = faker.name.lastName();
-	const email = faker.internet.email(first, last);
+	const domain = faker.internet.domainName();
+	const email = faker.internet.email(first, last, domain);
+
 	const password = faker.internet.password(8);
 	return {
 		name: `${first} ${last}`,

@@ -224,6 +224,30 @@ describe('Member controller unit tests', () => {
 			expect(u.graduationYear).toEqual(user.user.graduationYear);
 			expect(u.gender).not.toEqual(user.user.gender);
 		});
+
+		it('Successfully unsubscribes a single user', async () => {
+			const generatedUser = generatedUsers.find(val => user.user.email === val.email);
+			const userUpdate = {
+				...user.user,
+				gender: 'Male'
+			};
+			const u = await memberController.updateById(
+				{
+					body: {
+						password: generatedUser.password,
+						passwordConfirm: generatedUser.passwordConfirm
+					}
+				} as any,
+				user.user._id,
+				userUpdate as any,
+				user.user
+			);
+			expect(u).toHaveProperty('_id');
+			expect(u.password).toEqual(undefined);
+			expect(u.email).toEqual(user.user.email);
+			expect(u.graduationYear).toEqual(user.user.graduationYear);
+			expect(u.gender).not.toEqual(user.user.gender);
+		});
 	});
 
 	afterEach(() => server.mongoose.connection.dropDatabase());

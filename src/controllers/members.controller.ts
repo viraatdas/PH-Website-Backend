@@ -99,9 +99,15 @@ export class MemberController {
 		if (!password) throw new BadRequestError('A password is required');
 		if (!passwordConfirm) throw new BadRequestError('Please confirm your password');
 		if (password !== passwordConfirm) throw new BadRequestError('Passwords does not match');
+		memberDto.graduationYear = Number(memberDto.graduationYear);
+		const maxYear = new Date().getFullYear() + 20;
+		if (memberDto.graduationYear < 1869 || memberDto.graduationYear > maxYear)
+			throw new BadRequestError(
+				`Graduation year must be a number between 1869 and ${maxYear}`
+			);
 
-		memberDto.privateProfile = Boolean(memberDto.privateProfile);
-		memberDto.unsubscribed = Boolean(memberDto.unsubscribed);
+		memberDto.privateProfile = `${memberDto.privateProfile}`.toLowerCase() === 'true';
+		memberDto.unsubscribed = `${memberDto.unsubscribed}`.toLowerCase() === 'true';
 
 		const picture = files.find(file => file.fieldname === 'picture');
 		const resume = files.find(file => file.fieldname === 'resume');

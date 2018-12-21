@@ -85,7 +85,7 @@ export class MemberController extends BaseController {
 		@Body() memberDto: MemberDto,
 		@CurrentUser({ required: true }) user: IMemberModel
 	) {
-		this.logger.info('Receieved member:', memberDto);
+		// this.logger.info('Receieved member:', memberDto);
 		if (!ObjectId.isValid(id)) throw new BadRequestError('Invalid member ID');
 		if (!memberMatches(user, id))
 			throw new UnauthorizedError('You are unauthorized to edit this profile');
@@ -95,7 +95,9 @@ export class MemberController extends BaseController {
 			? (req.files as Express.Multer.File[])
 			: new Array<Express.Multer.File>();
 
-		if (!password) throw new BadRequestError('A password is required');
+		if (!password || password.length < 5)
+			throw new BadRequestError('A password longer than 5 characters is required');
+		// if (!password) throw new BadRequestError('A password is required');
 		if (!passwordConfirm) throw new BadRequestError('Please confirm your password');
 		if (password !== passwordConfirm) throw new BadRequestError('Passwords does not match');
 		memberDto.graduationYear = Number(memberDto.graduationYear);
@@ -115,8 +117,7 @@ export class MemberController extends BaseController {
 
 		let member = await Member.findById(id, '+password').exec();
 		if (!member) throw new BadRequestError('Member not found');
-		if (!member.comparePassword(password))
-			throw new UnauthorizedError('Incorrect password');
+		if (!member.comparePassword(password)) throw new UnauthorizedError('Incorrect password');
 
 		member = await Member.findByIdAndUpdate(id, memberDto, { new: true }).exec();
 		return member;

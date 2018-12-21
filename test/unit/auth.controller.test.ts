@@ -20,6 +20,7 @@ describe('Auth controller unit tests', () => {
 			const member = generateUser();
 			const req: Partial<Request> = {
 				body: {
+					password: member.password,
 					passwordConfirm: member.passwordConfirm
 				}
 			};

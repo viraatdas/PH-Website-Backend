@@ -127,7 +127,7 @@ describe('Member controller unit tests', () => {
 					user.user,
 					user.user
 				)
-			).rejects.toEqual(new BadRequestError('A password is required'));
+			).rejects.toEqual(new BadRequestError('A password longer than 5 characters is required'));
 		});
 
 		it('Fails to update a single user because no password confirm', async () => {

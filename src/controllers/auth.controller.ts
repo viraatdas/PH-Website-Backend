@@ -21,6 +21,7 @@ import {
 } from 'routing-controllers';
 import { ValidationMiddleware } from '../middleware/validation';
 import { BaseController } from './base.controller';
+import { compareSync, hashSync } from 'bcrypt';
 
 export const router = express.Router();
 
@@ -30,14 +31,16 @@ export class AuthController extends BaseController {
 	@Post('/signup')
 	@UseBefore(multer.any())
 	async signup(@Req() req: Request, @Body() member: MemberDto) {
-		const { passwordConfirm } = req.body;
+		const { password, passwordConfirm } = req.body;
 		const files: Express.Multer.File[] = req.files
 			? (req.files as Express.Multer.File[])
 			: new Array<Express.Multer.File>();
 
+		if (!password || password.length < 5)
+			throw new BadRequestError('A password longer than 5 characters is required');
 		if (!passwordConfirm) throw new BadRequestError('Please confirm your password');
-		if (passwordConfirm !== member.password)
-			throw new BadRequestError('Passwords did not match');
+		if (passwordConfirm !== password) throw new BadRequestError('Passwords did not match');
+		member.password = password;
 		member.graduationYear = Number(member.graduationYear);
 		const maxYear = new Date().getFullYear() + 20;
 		if (member.graduationYear < 1869 || member.graduationYear > maxYear)

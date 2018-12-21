@@ -8,7 +8,6 @@ import {
 	IsEmail,
 	IsEnum,
 	Matches,
-	MinLength,
 	IsOptional,
 	IsIn,
 	IsUrl,
@@ -17,6 +16,8 @@ import {
 } from 'class-validator';
 import { IsPhoneNumber } from '../validators/phone';
 import { Exclude, Expose } from 'class-transformer';
+
+const isNotEmpty = (obj: any, val: any) => val !== '' && val !== null && val !== undefined;
 
 export const genders = {
 	MALE: 'Male',
@@ -62,40 +63,39 @@ export class MemberDto {
 	@IsOptional()
 	@Expose()
 	privateProfile?: boolean;
-	// @IsOptional()
-	@ValidateIf((obj, val) => obj[val] !== '' && obj[val] !== null && obj[val] !== undefined)
+	@ValidateIf(isNotEmpty)
 	@IsPhoneNumber('USA', { message: 'Please provide a valid U.S. phone number' })
 	@Expose()
 	phone?: string;
 	setupEmailSent?: Date;
 	// @IsOptional()
-	@ValidateIf((obj, val) => obj[val] !== '' && obj[val] !== null && obj[val] !== undefined)
+	@ValidateIf(isNotEmpty)
 	@IsIn(majors, { message: 'Please provide a valid major' })
 	@Expose()
 	major?: string;
 	@Expose()
 	picture?: string;
 	// @IsOptional()
-	@ValidateIf((obj, val) => obj[val] !== '' && obj[val] !== null && obj[val] !== undefined)
+	@ValidateIf(isNotEmpty)
 	@Expose()
 	description?: string;
-	@ValidateIf((obj, val) => obj[val] !== '' && obj[val] !== null && obj[val] !== undefined)
+	@ValidateIf(isNotEmpty)
 	@Matches(/(facebook|fb)/, { message: 'Invalid Facebook URL' })
 	@Expose()
 	facebook?: string;
-	@ValidateIf((obj, val) => obj[val] !== '' && obj[val] !== null && obj[val] !== undefined)
+	@ValidateIf(isNotEmpty)
 	@Matches(/github/, { message: 'Invalid GitHub URL' })
 	@Expose()
 	github?: string;
-	@ValidateIf((obj, val) => obj[val] !== '' && obj[val] !== null && obj[val] !== undefined)
+	@ValidateIf(isNotEmpty)
 	@Matches(/linkedin/, { message: 'Invalid Linkedin URL' })
 	@Expose()
 	linkedin?: string;
-	@ValidateIf((obj, val) => obj[val] !== '' && obj[val] !== null && obj[val] !== undefined)
+	@ValidateIf(isNotEmpty)
 	@Matches(/devpost/, { message: 'Invalid Devpost URL' })
 	@Expose()
 	devpost?: string;
-	@ValidateIf((obj, val) => obj[val] !== '' && obj[val] !== null && obj[val] !== undefined)
+	@ValidateIf(isNotEmpty)
 	@IsUrl({}, { message: 'Invalid website URL' })
 	@Expose()
 	website?: string;

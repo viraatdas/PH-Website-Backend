@@ -129,6 +129,7 @@ describe('Suite: /api/events', () => {
 
 		it('Successfully creates an event', async () => {
 			const event = generateEvent();
+			event.privateEvent = false;
 
 			const {
 				body: { response },
@@ -298,7 +299,10 @@ describe('Suite: /api/events', () => {
 			const {
 				body: { error },
 				status
-			} = await request.post(`/api/events/invalidId`).send(event).auth(user.token, { type: 'bearer' });
+			} = await request
+				.post(`/api/events/invalidId`)
+				.send(event)
+				.auth(user.token, { type: 'bearer' });
 
 			expect(status).toEqual(400);
 			expect(error).toEqual('Invalid event ID');
@@ -393,9 +397,11 @@ describe('Suite: /api/events', () => {
 
 		it('Successfully updates an event', async () => {
 			const event = generateEvent();
+			event.privateEvent = true;
 			const createdEvent = await new Event(event).save();
 
 			event.name = 'Updated name';
+			event.privateEvent = false;
 
 			const {
 				body: { response },
@@ -410,7 +416,8 @@ describe('Suite: /api/events', () => {
 				expect.objectContaining({
 					name: event.name,
 					eventTime: event.eventTime.toISOString(),
-					location: event.location
+					location: event.location,
+					privateEvent: false
 				})
 			);
 		});

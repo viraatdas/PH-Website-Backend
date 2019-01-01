@@ -171,3 +171,5 @@ export const addMemberToPermissions = async (
 
 	return [member, perms];
 };
+
+export const toBoolean = (val: any, obj: any, type) => `${val}`.toLowerCase() === 'true';

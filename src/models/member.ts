@@ -15,7 +15,8 @@ import {
 	ValidateIf
 } from 'class-validator';
 import { IsPhoneNumber } from '../validators/phone';
-import { Exclude, Expose } from 'class-transformer';
+import { Exclude, Expose, Transform } from 'class-transformer';
+import { toBoolean } from '../utils';
 
 const isNotEmpty = (obj: any, val: any) => val !== '' && val !== null && val !== undefined;
 
@@ -58,9 +59,11 @@ export class MemberDto {
 	@Expose()
 	gender?: string;
 	@IsOptional()
+	@Transform(toBoolean)
 	@Expose()
 	unsubscribed?: boolean;
 	@IsOptional()
+	@Transform(toBoolean)
 	@Expose()
 	privateProfile?: boolean;
 	@ValidateIf(isNotEmpty)

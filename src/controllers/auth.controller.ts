@@ -51,8 +51,8 @@ export class AuthController extends BaseController {
 		const exists = await Member.findOne({ email: member.email }).exec();
 		if (exists) throw new BadRequestError('An account already exists with that email');
 
-		member.privateProfile = `${member.privateProfile}`.toLowerCase() === 'true';
-		member.unsubscribed = `${member.unsubscribed}`.toLowerCase() === 'true';
+		// member.privateProfile = `${member.privateProfile}`.toLowerCase() === 'true';
+		// member.unsubscribed = `${member.unsubscribed}`.toLowerCase() === 'true';
 
 		const picture = files.find(file => file.fieldname === 'picture');
 		const resume = files.find(file => file.fieldname === 'resume');

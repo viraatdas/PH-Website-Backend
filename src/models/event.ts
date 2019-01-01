@@ -1,8 +1,9 @@
 import { Document, Schema, model } from 'mongoose';
-import { Type } from 'class-transformer';
+import { Type, Transform } from 'class-transformer';
 import { IsNotEmpty, IsOptional, Matches } from 'class-validator';
 import { IMemberModel } from './member';
 import { IsDate } from '../validators/date';
+import { toBoolean } from '../utils';
 
 export class EventDto {
 	@IsNotEmpty({ message: 'Event must have a name' })
@@ -22,6 +23,7 @@ export class EventDto {
 	})
 	facebook: string;
 	@IsOptional()
+	@Transform(toBoolean)
 	privateEvent: boolean;
 }
 

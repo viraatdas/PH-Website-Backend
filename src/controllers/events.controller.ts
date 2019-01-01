@@ -86,7 +86,7 @@ export class EventsController extends BaseController {
 			.exec();
 		if (!event) throw new BadRequestError('Event does not exist');
 
-		body.privateEvent = `${body.privateEvent}`.toLowerCase() === 'true';
+		// body.privateEvent = `${body.privateEvent}`.toLowerCase() === 'true';
 		const updatedEvent = await Event.findByIdAndUpdate(id, body, {
 			new: true
 		})

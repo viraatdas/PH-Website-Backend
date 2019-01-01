@@ -27,11 +27,13 @@ export const generateEvent = () => {
 		min: 100000000000000,
 		max: 999999999999999
 	})}/`;
+	const privateEvent = faker.random.boolean();
 	return {
 		name,
 		eventTime,
 		location,
-		facebook
+		facebook,
+		privateEvent
 	};
 };
 

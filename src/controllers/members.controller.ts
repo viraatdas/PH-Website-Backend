@@ -107,8 +107,8 @@ export class MemberController extends BaseController {
 				`Graduation year must be a number between 1869 and ${maxYear}`
 			);
 
-		memberDto.privateProfile = `${memberDto.privateProfile}`.toLowerCase() === 'true';
-		memberDto.unsubscribed = `${memberDto.unsubscribed}`.toLowerCase() === 'true';
+		// memberDto.privateProfile = `${memberDto.privateProfile}`.toLowerCase() === 'true';
+		// memberDto.unsubscribed = `${memberDto.unsubscribed}`.toLowerCase() === 'true';
 
 		const picture = files.find(file => file.fieldname === 'picture');
 		const resume = files.find(file => file.fieldname === 'resume');

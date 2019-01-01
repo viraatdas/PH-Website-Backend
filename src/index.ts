@@ -7,13 +7,15 @@ const start = async () => {
 	try {
 		const server = await Server.createInstance();
 		server.app.listen(PORT, () => {
-			server.logger.info('CONFIG: ', CONFIG);
+			// server.logger.info('CONFIG: ', CONFIG);
 			server.logger.info(`Listening on port: ${PORT}`);
 		});
 
 		// Graceful shutdown
 		process.on('SIGTERM', async () => {
+			server.logger.warn('Shutting down server');
 			await server.mongoose.disconnect();
+			server.logger.info('Server successfully shutdown');
 			process.exit(0);
 		});
 

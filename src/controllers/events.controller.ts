@@ -76,25 +76,9 @@ export class EventsController extends BaseController {
 	// TODO: Change to put request
 	@Post('/:id')
 	@Authorized(['events'])
-	async updateEvent(@Req() req: Request) {
-		if (!ObjectId.isValid(req.params.id)) throw new BadRequestError('Invalid event ID');
-		const { name, privateEvent, eventTime, location, facebook } = req.body;
-		const eventBuilder = { privateEvent };
-		if (!name) throw new BadRequestError('Event must have a name');
-		else Object.assign(eventBuilder, { name });
-		if (!eventTime) throw new BadRequestError('Event must have a time');
-		if (!location) throw new BadRequestError('Event must have a location');
-		else Object.assign(eventBuilder, { location });
-		const time = Date.parse(eventTime);
-		if (isNaN(time)) throw new BadRequestError('Invalid event time');
-		else Object.assign(eventBuilder, { eventTime: time });
-		if (facebook) {
-			if (!facebook.match('((http|https)://)?(www[.])?facebook.com.*'))
-				throw new BadRequestError('Must specify a url from Facebook');
-			else Object.assign(eventBuilder, { facebook });
-		}
-
-		const event = await Event.findById(req.params.id)
+	async updateEvent(@Param('id') id: string, @Body() body: EventDto) {
+		if (!ObjectId.isValid(id)) throw new BadRequestError('Invalid event ID');
+		const event = await Event.findById(id)
 			.populate({
 				path: 'members',
 				model: Member
@@ -102,7 +86,8 @@ export class EventsController extends BaseController {
 			.exec();
 		if (!event) throw new BadRequestError('Event does not exist');
 
-		const updatedEvent = await Event.findByIdAndUpdate(req.params.id, eventBuilder, {
+		body.privateEvent = `${body.privateEvent}`.toLowerCase() === 'true';
+		const updatedEvent = await Event.findByIdAndUpdate(id, body, {
 			new: true
 		})
 			.populate({
@@ -111,8 +96,6 @@ export class EventsController extends BaseController {
 			})
 			.lean()
 			.exec();
-		// await event.update(eventBuilder).exec();
-		// return event.toJSON();
 		return updatedEvent;
 	}
 

@@ -294,10 +294,11 @@ describe('Suite: /api/events', () => {
 
 	describe('Update an event', () => {
 		it('Fails to update an event because invalid id', async () => {
+			const event = await new Event(generateEvent()).save();
 			const {
 				body: { error },
 				status
-			} = await request.post(`/api/events/invalidId`).auth(user.token, { type: 'bearer' });
+			} = await request.post(`/api/events/invalidId`).send(event).auth(user.token, { type: 'bearer' });
 
 			expect(status).toEqual(400);
 			expect(error).toEqual('Invalid event ID');

@@ -110,7 +110,7 @@ export class MemberDto {
 	rememberToken?: string;
 	resetPasswordToken?: string;
 	comparePassword(password: string) {
-		return bcrypt.compareSync(password, this.password);
+		return password && bcrypt.compareSync(password, this.password);
 	}
 }
 

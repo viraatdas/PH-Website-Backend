@@ -28,7 +28,7 @@ describe('Report Route Tests', () => {
 	);
 
 	describe('Members Report Route Tests', () => {
-		it('Succesfully returns the major distribution of members', async () => {
+		it('Successfully returns the major distribution of members', async () => {
 			const members: any = generateUsers(6);
 
 			members[0].major = 'Computer Science';
@@ -56,7 +56,7 @@ describe('Report Route Tests', () => {
 			});
 		});
 
-		it('Succesfully returns the class distribution of members', async () => {
+		it('Successfully returns the class distribution of members', async () => {
 			const members = generateUsers(6);
 
 			members[1].graduationYear = 2019;
@@ -82,7 +82,7 @@ describe('Report Route Tests', () => {
 			});
 		});
 
-		it('Succesfully returns the number of new members that joined every month', async () => {
+		it('Successfully returns the number of new members that joined every month', async () => {
 			const members = generateUsers(6);
 
 			// Register all of the users to the database
@@ -90,11 +90,11 @@ describe('Report Route Tests', () => {
 
 			// Update each member to have different createdAt dates
 			// * Date months are 0 index so a month of 12 is actually January
-			signedUpUsers[0].user.createdAt = new Date(2018, 4);
-			signedUpUsers[1].user.createdAt = new Date(2018, 4);
-			signedUpUsers[2].user.createdAt = new Date(2017, 6);
-			signedUpUsers[3].user.createdAt = new Date(2017, 6);
-			signedUpUsers[4].user.createdAt = new Date(2016, 11);
+			signedUpUsers[0].user.createdAt = new Date(2018, 5);
+			signedUpUsers[1].user.createdAt = new Date(2018, 5);
+			signedUpUsers[2].user.createdAt = new Date(2017, 7);
+			signedUpUsers[3].user.createdAt = new Date(2017, 7);
+			signedUpUsers[4].user.createdAt = new Date(2016, 12);
 			signedUpUsers[5].user.createdAt = new Date(2016, 1);
 
 			for (const user of signedUpUsers) {
@@ -110,14 +110,14 @@ describe('Report Route Tests', () => {
 
 			expect(status).toEqual(200);
 			expect(response.numNewMembersPerMonth).toEqual({
-				'02/2016': 1,
+				'01/2016': 1,
 				'12/2016': 1,
 				'07/2017': 2,
 				'05/2018': 2
 			});
 		});
 
-		it('Succesfully returns the number of members for each month', async () => {
+		it('Successfully returns the number of members for each month', async () => {
 			const members = generateUsers(6);
 
 			// Register all of the users to the database
@@ -125,12 +125,12 @@ describe('Report Route Tests', () => {
 
 			// Update each member to have different createdAt dates
 			// * Date months are 0 index so a month of 12 is actually January
-			signedUpUsers[0].user.createdAt = new Date(2018, 4);
-			signedUpUsers[1].user.createdAt = new Date(2018, 4);
-			signedUpUsers[2].user.createdAt = new Date(2017, 6);
-			signedUpUsers[3].user.createdAt = new Date(2017, 6);
-			signedUpUsers[4].user.createdAt = new Date(2016, 11);
-			signedUpUsers[5].user.createdAt = new Date(2016, 1);
+			signedUpUsers[0].user.createdAt = new Date(2018, 5);
+			signedUpUsers[1].user.createdAt = new Date(2018, 5);
+			signedUpUsers[2].user.createdAt = new Date(2017, 7);
+			signedUpUsers[3].user.createdAt = new Date(2017, 7);
+			signedUpUsers[4].user.createdAt = new Date(2016, 12);
+			signedUpUsers[5].user.createdAt = new Date(2016, 2);
 
 			for (const user of signedUpUsers) {
 				const databaseUser = await Member.findById(user.user._id).exec();
@@ -152,7 +152,7 @@ describe('Report Route Tests', () => {
 			});
 		});
 
-		it('Succesfully returns the members event attendance', async () => {
+		it('Successfully returns the members event attendance', async () => {
 			const members = generateUsers(6);
 
 			// Register all of the users to the database
@@ -185,7 +185,7 @@ describe('Report Route Tests', () => {
 			});
 		});
 
-		it('Succesfully returns the event attendance per month', async () => {
+		it('Successfully returns the event attendance per month', async () => {
 			const members = generateUsers(5);
 
 			// Register all of the users to the database
@@ -197,22 +197,22 @@ describe('Report Route Tests', () => {
 			const events = await [
 				new Event({
 					...generateEvent(),
-					eventTime: new Date(2016, 0),
+					eventTime: new Date(2016, 1),
 					members: signedUpUsersIds.slice(0, 4)
 				}),
 				new Event({
 					...generateEvent(),
-					eventTime: new Date(2016, 1),
+					eventTime: new Date(2016, 2),
 					members: signedUpUsersIds.slice(0, 3)
 				}),
 				new Event({
 					...generateEvent(),
-					eventTime: new Date(2018, 4),
+					eventTime: new Date(2018, 5),
 					members: signedUpUsersIds.slice(0, 2)
 				}),
 				new Event({
 					...generateEvent(),
-					eventTime: new Date(2018, 5),
+					eventTime: new Date(2018, 6),
 					members: signedUpUsersIds.slice(0, 1)
 				})
 			].map(event => {
@@ -236,7 +236,7 @@ describe('Report Route Tests', () => {
 	});
 
 	describe('Events Report Route Tests', () => {
-		it('Succesfully returns the event name', async () => {
+		it('Successfully returns the event name', async () => {
 			const name = 'test';
 			const event = await new Event({
 				...generateEvent(),
@@ -252,7 +252,7 @@ describe('Report Route Tests', () => {
 			expect(response.eventName).toBe(name);
 		});
 
-		it('Succesfully returns the major distribution of the members of an event', async () => {
+		it('Successfully returns the major distribution of the members of an event', async () => {
 			const members: any = generateUsers(6);
 
 			members[0].major = 'Computer Science';
@@ -285,7 +285,7 @@ describe('Report Route Tests', () => {
 			});
 		});
 
-		it('Succesfully returns the grade distribution of the members of an event', async () => {
+		it('Successfully returns the grade distribution of the members of an event', async () => {
 			const members = generateUsers(6);
 
 			members[1].graduationYear = 2019;
@@ -316,7 +316,7 @@ describe('Report Route Tests', () => {
 			});
 		});
 
-		it('Succesfully returns the event attendance prior to the event of the members of an event', async () => {
+		it('Successfully returns the event attendance prior to the event of the members of an event', async () => {
 			const members = generateUsers(2);
 
 			// Register all of the users to the database
@@ -365,7 +365,7 @@ describe('Report Route Tests', () => {
 		});
 	});
 
-	it('Succesfully returns the current event attendance of the members of an event', async () => {
+	it('Successfully returns the current event attendance of the members of an event', async () => {
 		const members = generateUsers(2);
 
 		// Register all of the users to the database

@@ -1,4 +1,4 @@
-import { errorRes } from '../utils';
+import { errorRes, sendErrorEmail } from '../utils';
 import { createLogger } from '../utils/logger';
 
 const logger = createLogger('GlobalError');
@@ -7,11 +7,13 @@ export const globalError = (err, req, res, next) => {
 	let { message, httpCode } = err;
 	message = message || 'Whoops! Something went wrong!';
 	httpCode = httpCode || 500;
-	// logger.error('Caught error:', message);
+	// Send an email if error is from server
 	if (httpCode === 500) {
-		logger.error('Caught error:', message);
-		logger.error('Error:', err);
-	}
+		logger.emerg('Unhandled exception:', err);
+		sendErrorEmail(err)
+			.then(() => logger.info('Error email sent!'))
+			.catch(() => logger.error('Error sending email'));
+	} else logger.error('Caught error:', message);
 	errorRes(res, httpCode, message);
 	next();
 };

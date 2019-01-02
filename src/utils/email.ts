@@ -52,3 +52,16 @@ export const sendAccountCreatedEmail = async (member: IMemberModel, event: IEven
 		}
 	});
 };
+
+export const sendErrorEmail = async (error: Error) => {
+	return (sendGrid as any).send({
+		templateId: 'd-9fbbdf1f9c90423a80d69b83885eefa8',
+		from: `"${CONFIG.ORG_NAME}" <${CONFIG.EMAIL}>`,
+		to: 'purduehackers@gmail.com',
+		dynamicTemplateData: {
+			timestamp: new Date(Date.now()).toLocaleString(),
+			message: error.message,
+			stack: error.stack.replace(/\n/g, '<br>&emsp;')
+		}
+	});
+};

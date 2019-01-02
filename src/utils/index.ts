@@ -104,8 +104,9 @@ export const uploadToStorage = async (
 		});
 
 		blobStream.on('error', error => {
+			console.error('Error uploading file to folder:', folder);
 			console.error(error);
-			reject('Something is wrong! Unable to upload at the moment.');
+			reject(new Error('Something is wrong! Unable to upload at the moment.'));
 		});
 
 		// blobStream.on('finish', () => {

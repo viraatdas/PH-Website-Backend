@@ -1,7 +1,7 @@
 import 'jest';
 import * as faker from 'faker';
 import Server from '../../src/server';
-import { generateUsers } from '../../src/utils/helper';
+import { generateUsers } from '../helper';
 import { IMemberModel } from '../../src/models/member';
 import { AuthController } from '../../src/controllers/auth.controller';
 import { MemberController } from '../../src/controllers/members.controller';
@@ -127,7 +127,9 @@ describe('Member controller unit tests', () => {
 					user.user,
 					user.user
 				)
-			).rejects.toEqual(new BadRequestError('A password is required'));
+			).rejects.toEqual(
+				new BadRequestError('A password longer than 5 characters is required')
+			);
 		});
 
 		it('Fails to update a single user because no password confirm', async () => {
@@ -229,7 +231,7 @@ describe('Member controller unit tests', () => {
 			const generatedUser = generatedUsers.find(val => user.user.email === val.email);
 			const userUpdate = {
 				...user.user,
-				gender: 'Male'
+				unsubscribed: 'true'
 			};
 			const u = await memberController.updateById(
 				{
@@ -246,7 +248,7 @@ describe('Member controller unit tests', () => {
 			expect(u.password).toEqual(undefined);
 			expect(u.email).toEqual(user.user.email);
 			expect(u.graduationYear).toEqual(user.user.graduationYear);
-			expect(u.gender).not.toEqual(user.user.gender);
+			expect(u.unsubscribed).not.toEqual(user.user.unsubscribed);
 		});
 	});
 

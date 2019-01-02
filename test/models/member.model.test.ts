@@ -1,6 +1,6 @@
 import 'jest';
 import * as faker from 'faker';
-import { generateUser } from '../../src/utils/helper';
+import { generateUser } from '../helper';
 import { MemberDto, genders, majors } from '../../src/models/member';
 import { validate, ValidationError } from 'class-validator';
 
@@ -104,41 +104,51 @@ describe('Member model unit tests', () => {
 		});
 	});
 
-	describe('Password tests', () => {
-		it('Fails because no password', async () => {
-			const member = new MemberDto();
-			Object.assign(member, generateUser());
-			delete member.password;
-			const result = await validate(member);
-			expect(result.length).toEqual(1);
-			const err = getError(result);
-			expect(err).toEqual('A password longer than 5 characters is required');
-		});
+	// describe('Password tests', () => {
+	// 	it('Fails because no password', async () => {
+	// 		const member = new MemberDto();
+	// 		Object.assign(member, generateUser());
+	// 		delete member.password;
+	// 		const result = await validate(member);
+	// 		expect(result.length).toEqual(1);
+	// 		const err = getError(result);
+	// 		expect(err).toEqual('A password longer than 5 characters is required');
+	// 	});
 
-		it('Fails because password too short', async () => {
-			const member = new MemberDto();
-			Object.assign(member, generateUser());
-			member.password = 'p';
-			const result = await validate(member);
-			expect(result.length).toEqual(1);
-			const err = getError(result);
-			expect(err).toEqual('A password longer than 5 characters is required');
-		});
+	// 	it('Fails because password too short', async () => {
+	// 		const member = new MemberDto();
+	// 		Object.assign(member, generateUser());
+	// 		member.password = 'p';
+	// 		const result = await validate(member);
+	// 		expect(result.length).toEqual(1);
+	// 		const err = getError(result);
+	// 		expect(err).toEqual('A password longer than 5 characters is required');
+	// 	});
 
-		it('Succeeds because valid password', async () => {
-			const member = new MemberDto();
-			Object.assign(member, generateUser());
-			member.password = faker.internet.password(8);
-			const result = await validate(member);
-			expect(result.length).toEqual(0);
-		});
-	});
+	// 	it('Succeeds because valid password', async () => {
+	// 		const member = new MemberDto();
+	// 		Object.assign(member, generateUser());
+	// 		member.password = faker.internet.password(8);
+	// 		const result = await validate(member);
+	// 		expect(result.length).toEqual(0);
+	// 	});
+	// });
 
 	describe('Gender tests', () => {
 		it('Fails because invalid gender', async () => {
 			const member = new MemberDto();
 			Object.assign(member, generateUser());
 			member.gender = 'Hi';
+			const result = await validate(member);
+			expect(result.length).toEqual(1);
+			const err = getError(result);
+			expect(err).toEqual('Please provide a valid gender');
+		});
+
+		it('Fails because empty gender', async () => {
+			const member = new MemberDto();
+			Object.assign(member, generateUser());
+			member.gender = '';
 			const result = await validate(member);
 			expect(result.length).toEqual(1);
 			const err = getError(result);
@@ -167,6 +177,14 @@ describe('Member model unit tests', () => {
 			expect(err).toEqual('Please provide a valid U.S. phone number');
 		});
 
+		it('Succeeds because empty phone number', async () => {
+			const member = new MemberDto();
+			Object.assign(member, generateUser());
+			member.phone = '';
+			const result = await validate(member);
+			expect(result.length).toEqual(0);
+		});
+
 		it('Succeeds because valid phone number', async () => {
 			const member = new MemberDto();
 			Object.assign(member, generateUser());
@@ -185,6 +203,14 @@ describe('Member model unit tests', () => {
 			expect(result.length).toEqual(1);
 			const err = getError(result);
 			expect(err).toEqual('Please provide a valid major');
+		});
+
+		it('Succeeds because empty major', async () => {
+			const member = new MemberDto();
+			Object.assign(member, generateUser());
+			member.major = '';
+			const result = await validate(member);
+			expect(result.length).toEqual(0);
 		});
 
 		it('Succeeds because valid major', async () => {
@@ -207,6 +233,14 @@ describe('Member model unit tests', () => {
 			expect(result.length).toEqual(1);
 			const err = getError(result);
 			expect(err).toEqual('Invalid website URL');
+		});
+
+		it('Succeeds because empty website', async () => {
+			const member = new MemberDto();
+			Object.assign(member, generateUser());
+			member.website = '';
+			const result = await validate(member);
+			expect(result.length).toEqual(0);
 		});
 
 		it('Succeeds because valid website URL', async () => {

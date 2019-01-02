@@ -8,14 +8,17 @@ import {
 	IsEmail,
 	IsEnum,
 	Matches,
-	MinLength,
 	IsOptional,
 	IsIn,
 	IsUrl,
-	IsMobilePhone,
-	IsNotEmpty
+	IsNotEmpty,
+	ValidateIf
 } from 'class-validator';
 import { IsPhoneNumber } from '../validators/phone';
+import { Exclude, Expose, Transform } from 'class-transformer';
+import { toBoolean } from '../utils';
+
+const isNotEmpty = (obj: any, val: any) => val !== '' && val !== null && val !== undefined;
 
 export const genders = {
 	MALE: 'Male',
@@ -36,18 +39,82 @@ export const majors = [
 	'Other'
 ];
 
+@Exclude()
 export class MemberDto {
 	@IsNotEmpty({ message: 'Please provide your first and last name' })
 	@Matches(/([a-zA-Z']+ )+[a-zA-Z']+$/, { message: 'Please provide your first and last name' })
+	@Expose()
 	name: string;
-	// @IsMemberAlreadyExist({ message: 'An account already exists with that email' })
 	@IsNotEmpty({ message: 'Please provide a valid email address' })
 	@IsEmail({}, { message: 'Please provide a valid email address' })
+	@Expose()
 	email: string;
 	@IsNotEmpty()
+	@Expose()
 	graduationYear: number;
-	@MinLength(5, { message: 'A password longer than 5 characters is required' })
+	@Exclude()
 	password: string;
+	@IsOptional()
+	@IsEnum(genders, { message: 'Please provide a valid gender' })
+	@Expose()
+	gender?: string;
+	@IsOptional()
+	@Transform(toBoolean)
+	@Expose()
+	unsubscribed?: boolean;
+	@IsOptional()
+	@Transform(toBoolean)
+	@Expose()
+	privateProfile?: boolean;
+	@ValidateIf(isNotEmpty)
+	@IsPhoneNumber('USA', { message: 'Please provide a valid U.S. phone number' })
+	@Expose()
+	phone?: string;
+	setupEmailSent?: Date;
+	// @IsOptional()
+	@ValidateIf(isNotEmpty)
+	@IsIn(majors, { message: 'Please provide a valid major' })
+	@Expose()
+	major?: string;
+	@Expose()
+	picture?: string;
+	// @IsOptional()
+	@ValidateIf(isNotEmpty)
+	@Expose()
+	description?: string;
+	@ValidateIf(isNotEmpty)
+	@Matches(/(facebook|fb)/, { message: 'Invalid Facebook URL' })
+	@Expose()
+	facebook?: string;
+	@ValidateIf(isNotEmpty)
+	@Matches(/github/, { message: 'Invalid GitHub URL' })
+	@Expose()
+	github?: string;
+	@ValidateIf(isNotEmpty)
+	@Matches(/linkedin/, { message: 'Invalid Linkedin URL' })
+	@Expose()
+	linkedin?: string;
+	@ValidateIf(isNotEmpty)
+	@Matches(/devpost/, { message: 'Invalid Devpost URL' })
+	@Expose()
+	devpost?: string;
+	@ValidateIf(isNotEmpty)
+	@IsUrl({}, { message: 'Invalid website URL' })
+	@Expose()
+	website?: string;
+	@Expose()
+	resume?: string;
+	@Expose()
+	resumeLink?: string;
+	authenticatedAt?: Date;
+	rememberToken?: string;
+	resetPasswordToken?: string;
+	comparePassword(password: string) {
+		return password && bcrypt.compareSync(password, this.password);
+	}
+}
+
+export interface IMemberModel extends MemberDto, Document {
 	permissions?: IPermissionModel[];
 	events?: IEventModel[];
 	locations?: {
@@ -56,51 +123,9 @@ export class MemberDto {
 		dateEnd: Date;
 	}[];
 	jobs?: IJobModel[];
-	@IsOptional()
-	@IsEnum(genders, { message: 'Please provide a valid gender' })
-	gender?: string;
-	@IsOptional()
-	unsubscribed?: boolean;
-	@IsOptional()
-	privateProfile?: boolean;
-	@IsOptional()
-	@IsPhoneNumber('USA', { message: 'Please provide a valid U.S. phone number' })
-	phone?: string;
-	setupEmailSent?: Date;
-	@IsOptional()
-	@IsIn(majors, { message: 'Please provide a valid major' })
-	major?: string;
-	picture?: string;
-	@IsOptional()
-	description?: string;
-	@IsOptional()
-	@Matches(/(facebook|fb)/, { message: 'Invalid Facebook URL' })
-	facebook?: string;
-	@IsOptional()
-	@Matches(/github/, { message: 'Invalid GitHub URL' })
-	github?: string;
-	@IsOptional()
-	@Matches(/linkedin/, { message: 'Invalid Linkedin URL' })
-	linkedin?: string;
-	@IsOptional()
-	@Matches(/devpost/, { message: 'Invalid Devpost URL' })
-	devpost?: string;
-	@IsOptional()
-	@IsUrl({}, { message: 'Invalid website URL' })
-	website?: string;
-	resume?: string;
-	resumeLink?: string;
 	createdAt: Date;
 	updatedAt: Date;
-	authenticatedAt?: Date;
-	rememberToken?: string;
-	resetPasswordToken?: string;
-	comparePassword(password: string) {
-		return bcrypt.compareSync(password, this.password);
-	}
 }
-
-export interface IMemberModel extends MemberDto, Document {}
 
 const schema = new Schema(
 	{

@@ -8,8 +8,11 @@ import CONFIG from '../config';
 export * from './email';
 
 const storage = new GoogleCloudStorage({
-	projectId: 'purduehackers-212319',
-	keyFilename: 'purduehackers.json'
+	projectId: CONFIG.GC_PROJECT_ID,
+	credentials: {
+		private_key: CONFIG.GC_PRIVATE_KEY,
+		client_email: CONFIG.GC_CLIENT_EMAIL
+	}
 });
 
 const bucket = storage.bucket(CONFIG.GC_BUCKET);
@@ -69,11 +72,13 @@ export function to<T, U = any>(
 	promise: Promise<T>,
 	errorExt?: object
 ): Promise<[T | null, U | null]> {
-	return promise.then<[T, null]>((data: T) => [data, null]).catch<[null, U]>(err => {
-		if (errorExt) Object.assign(err, errorExt);
+	return promise
+		.then<[T, null]>((data: T) => [data, null])
+		.catch<[null, U]>(err => {
+			if (errorExt) Object.assign(err, errorExt);
 
-		return [null, err];
-	});
+			return [null, err];
+		});
 }
 
 export const uploadToStorage = async (
@@ -166,3 +171,5 @@ export const addMemberToPermissions = async (
 
 	return [member, perms];
 };
+
+export const toBoolean = (val: any, obj: any, type) => `${val}`.toLowerCase() === 'true';

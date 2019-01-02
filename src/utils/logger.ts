@@ -7,7 +7,12 @@ const customConsoleFormat = format.printf(({ level, timestamp, context, message,
 	let result = `[${level}] [${timestamp}]`;
 	if (context) result += ` ${chalk.yellow(`[${context}]`)} --`;
 	result += ` ${message}`;
-	if (meta) result += ` ${util.inspect(meta, { colors: true, compact: false })}`;
+
+	// if (meta) result += ` ${(util as any).inspect(...meta, { colors: true, compact: false })}`;
+	if (meta && Array.isArray(meta))
+		result += `${(util as any).formatWithOptions({ colors: true, compact: false }, ...meta)}`;
+	else if (meta)
+		result += ` ${(util as any).formatWithOptions({ colors: true, compact: false }, meta)}`;
 
 	return result;
 });
@@ -30,7 +35,7 @@ const transporters = context => [
 ];
 
 // tslint:disable-next-line:ban-types
-export const createLogger = (context: string | object | Function) => {
+export const createLogger = (context: string | object | (() => any)) => {
 	if (typeof context === 'object') context = context.constructor.name;
 	if (typeof context === 'function') context = context.name;
 	return createWinstonLogger({

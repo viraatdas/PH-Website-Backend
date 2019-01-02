@@ -1,7 +1,7 @@
 import 'jest';
 import * as supertest from 'supertest';
 import Server from '../../src/server';
-import { generateUser } from '../../src/utils/helper';
+import { generateUser } from '../helper';
 
 let server: Server;
 let request: supertest.SuperTest<supertest.Test>;
@@ -109,7 +109,7 @@ describe('Auth route tests', () => {
 				body: { response },
 				status
 			} = await request.post('/api/auth/signup').send(generatedUser);
-			expect(status).toStrictEqual(200);
+			expect(status).toEqual(200);
 			expect(response).toHaveProperty('token');
 			expect(response).toHaveProperty('user');
 			expect(response.user.name).toStrictEqual(generatedUser.name);
@@ -166,7 +166,7 @@ describe('Auth route tests', () => {
 				body: { response },
 				status
 			} = await request.post('/api/auth/signup').send(generatedUser);
-			expect(status).toStrictEqual(200);
+			expect(status).toEqual(200);
 			expect(response).toHaveProperty('token');
 			expect(response).toHaveProperty('user');
 			expect(response.user.name).toStrictEqual(generatedUser.name);

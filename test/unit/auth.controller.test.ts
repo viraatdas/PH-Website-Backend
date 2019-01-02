@@ -1,8 +1,8 @@
 import 'jest';
-import { generateUser } from '../../src/utils/helper';
+import { Request } from 'express';
+import { generateUser } from '../helper';
 import Server from '../../src/server';
 import { AuthController } from '../../src/controllers/auth.controller';
-import { Request } from 'express';
 import { BadRequestError } from 'routing-controllers';
 
 let server: Server;
@@ -20,6 +20,7 @@ describe('Auth controller unit tests', () => {
 			const member = generateUser();
 			const req: Partial<Request> = {
 				body: {
+					password: member.password,
 					passwordConfirm: member.passwordConfirm
 				}
 			};

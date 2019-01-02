@@ -1,8 +1,7 @@
-import * as express from 'express';
 import { Request } from 'express';
 // import * as paginate from 'express-paginate';
 import { ObjectId } from 'mongodb';
-import { compareSync, compare } from 'bcrypt';
+import { compare, compareSync } from 'bcrypt';
 import { Member, MemberDto, IMemberModel, majors } from '../models/member';
 import { Event, IEventModel } from '../models/event';
 import { Location } from '../models/location';
@@ -24,16 +23,15 @@ import {
 	Post,
 	BodyParam,
 	Authorized,
-	Delete
+	Delete,
+	UseAfter
 } from 'routing-controllers';
-import { createLogger } from '../utils/logger';
+import { BaseController } from './base.controller';
+import { ValidationMiddleware } from '../middleware/validation';
 
-// TODO: Add auth to routes
-// TODO: Add permissions to routes
 @JsonController('/api/members')
-export class MemberController {
-	private readonly logger = createLogger(this);
-
+@UseAfter(ValidationMiddleware)
+export class MemberController extends BaseController {
 	@Get('/')
 	async getAll(@QueryParam('sortBy') sortBy?: string, @QueryParam('order') order?: number) {
 		order = order === 1 ? 1 : -1;
@@ -87,6 +85,7 @@ export class MemberController {
 		@Body() memberDto: MemberDto,
 		@CurrentUser({ required: true }) user: IMemberModel
 	) {
+		// this.logger.info('Receieved member:', memberDto);
 		if (!ObjectId.isValid(id)) throw new BadRequestError('Invalid member ID');
 		if (!memberMatches(user, id))
 			throw new UnauthorizedError('You are unauthorized to edit this profile');
@@ -96,7 +95,9 @@ export class MemberController {
 			? (req.files as Express.Multer.File[])
 			: new Array<Express.Multer.File>();
 
-		if (!password) throw new BadRequestError('A password is required');
+		if (!password || password.length < 5)
+			throw new BadRequestError('A password longer than 5 characters is required');
+		// if (!password) throw new BadRequestError('A password is required');
 		if (!passwordConfirm) throw new BadRequestError('Please confirm your password');
 		if (password !== passwordConfirm) throw new BadRequestError('Passwords does not match');
 		memberDto.graduationYear = Number(memberDto.graduationYear);
@@ -106,8 +107,8 @@ export class MemberController {
 				`Graduation year must be a number between 1869 and ${maxYear}`
 			);
 
-		memberDto.privateProfile = `${memberDto.privateProfile}`.toLowerCase() === 'true';
-		memberDto.unsubscribed = `${memberDto.unsubscribed}`.toLowerCase() === 'true';
+		// memberDto.privateProfile = `${memberDto.privateProfile}`.toLowerCase() === 'true';
+		// memberDto.unsubscribed = `${memberDto.unsubscribed}`.toLowerCase() === 'true';
 
 		const picture = files.find(file => file.fieldname === 'picture');
 		const resume = files.find(file => file.fieldname === 'resume');
@@ -116,8 +117,7 @@ export class MemberController {
 
 		let member = await Member.findById(id, '+password').exec();
 		if (!member) throw new BadRequestError('Member not found');
-		if (!(await compare(password, member.password)))
-			throw new UnauthorizedError('Incorrect password');
+		if (!member.comparePassword(password)) throw new UnauthorizedError('Incorrect password');
 
 		member = await Member.findByIdAndUpdate(id, memberDto, { new: true }).exec();
 		return member;

@@ -8,7 +8,7 @@ import * as passport from 'passport';
 import * as cors from 'cors';
 import * as helmet from 'helmet';
 import * as yes from 'yes-https';
-import { join, resolve } from 'path';
+import { useExpressServer } from 'routing-controllers';
 import CONFIG from './config';
 import passportMiddleWare, { extractUser } from './middleware/passport';
 import { globalError } from './middleware/globalError';
@@ -20,13 +20,14 @@ import { router as permissions } from './routes/permissions';
 import { router as autocomplete } from './routes/autocomplete';
 import { router as reports } from './routes/reports';
 
-import { useExpressServer } from 'routing-controllers';
-
 // import { AuthController } from './controllers/auth.controller';
 import { SuccessInterceptor } from './interceptors/success.interceptor';
 import { currentUserChecker, authorizationChecker } from './middleware/authentication';
 // import { MemberController } from './controllers/members.controller';
 // import { EventsController } from './controllers/events.controller';
+import { createLogger } from './utils/logger';
+import { Logger } from 'winston';
+
 const { NODE_ENV, DB } = CONFIG;
 
 export default class Server {
@@ -37,9 +38,11 @@ export default class Server {
 	}
 	public app: express.Application;
 	public mongoose: typeof mongoose;
+	public logger: Logger;
 
 	private constructor() {
 		this.app = express();
+		this.logger = createLogger(this);
 		this.setup();
 	}
 

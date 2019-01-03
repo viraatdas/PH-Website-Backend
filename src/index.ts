@@ -13,9 +13,7 @@ const start = async () => {
 
 		// Graceful shutdown
 		process.on('SIGTERM', async () => {
-			server.logger.warn('Shutting down server');
 			await server.mongoose.disconnect();
-			server.logger.info('Server successfully shutdown');
 			httpServer.close();
 			process.exit(0);
 		});

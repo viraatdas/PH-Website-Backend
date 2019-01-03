@@ -25,7 +25,7 @@ const updateDatabase = async upcomingEvents => {
 		'_id facebook'
 	)
 		.exec()
-		.then((result: any) => (result = result.map(event => event.facebook)));
+		.then(result => result.map(event => event.facebook));
 
 	for (const currEvent of upcomingEvents) {
 		const {

@@ -17,7 +17,7 @@ export const sendResetEmail = async (member: IMemberModel) => {
 	const url =
 		CONFIG.NODE_ENV !== 'production' ? 'http://localhost:3000' : 'https://purduehackers.com';
 
-	return (sendGrid as any).send({
+	return sendGrid.send({
 		templateId: 'd-850d406dbbf240bc9f53f455ed975321',
 		from: `"${CONFIG.ORG_NAME}" <${CONFIG.EMAIL}>`,
 		to: member.email,
@@ -26,7 +26,7 @@ export const sendResetEmail = async (member: IMemberModel) => {
 			url,
 			token
 		}
-	});
+	} as any);
 };
 
 export const sendAccountCreatedEmail = async (member: IMemberModel, event: IEventModel) => {
@@ -39,7 +39,7 @@ export const sendAccountCreatedEmail = async (member: IMemberModel, event: IEven
 	const url =
 		CONFIG.NODE_ENV !== 'production' ? 'http://localhost:3000' : 'https://purduehackers.com';
 
-	return await (sendGrid as any).send({
+	return await sendGrid.send({
 		templateId: 'd-0bba1a0346c24bd69a46d81d2e950e55',
 		from: `"${CONFIG.ORG_NAME}" <${CONFIG.EMAIL}>`,
 		to: member.email,
@@ -50,18 +50,18 @@ export const sendAccountCreatedEmail = async (member: IMemberModel, event: IEven
 			url,
 			token
 		}
-	});
+	} as any);
 };
 
-export const sendErrorEmail = async (error: Error) => {
-	return (sendGrid as any).send({
+export const sendErrorEmail = async (error: Error, user?: IMemberModel) =>
+	sendGrid.send({
 		templateId: 'd-9fbbdf1f9c90423a80d69b83885eefa8',
 		from: `"${CONFIG.ORG_NAME}" <${CONFIG.EMAIL}>`,
 		to: 'purduehackers@gmail.com',
 		dynamicTemplateData: {
 			timestamp: new Date(Date.now()).toLocaleString(),
-			message: error.message,
-			stack: error.stack.replace(/\n/g, '<br>&emsp;')
+			message: error.message.replace(/\n/g, '<br>'),
+			stack: error.stack.replace(/\n/g, '<br>&emsp;'),
+			user
 		}
-	});
-};
+	} as any);

@@ -1,4 +1,4 @@
-import { Request, Response } from 'express';
+import { Response } from 'express';
 import { ObjectId } from 'mongodb';
 import * as GoogleCloudStorage from '@google-cloud/storage';
 import * as Multer from 'multer';
@@ -25,8 +25,6 @@ export const multer = Multer({
 });
 
 export const successRes = (res: Response, response: any) => res.json({ status: 200, response });
-
-export const success = (response: any) => ({ status: 200, response });
 
 export const errorRes = (res: Response, status: number, error: any) =>
 	res.status(status).json({
@@ -105,14 +103,9 @@ export const uploadToStorage = async (
 
 		blobStream.on('error', error => {
 			console.error('Error uploading file to folder:', folder);
-			console.error(error);
-			reject(new Error('Something is wrong! Unable to upload at the moment.'));
+			// reject(new Error('Something is wrong! Unable to upload at the moment.'));
+			reject(error);
 		});
-
-		// blobStream.on('finish', () => {
-		// 	// The public URL can be used to directly access the file via HTTP.
-		// 	fileUpload.getMetadata().then(meta => resolve(meta['0'].mediaLink));
-		// });
 
 		blobStream.on('finish', () => {
 			// The public URL can be used to directly access the file via HTTP.

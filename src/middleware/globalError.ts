@@ -10,10 +10,13 @@ export const globalError = (err, req, res, next) => {
 	// Send an email if error is from server
 	if (httpCode === 500) {
 		logger.emerg('Unhandled exception:', err);
-		sendErrorEmail(err)
-			.then(() => logger.info('Error email sent!'))
-			.catch(() => logger.error('Error sending email'));
-	} else logger.error('Caught error:', message);
-	errorRes(res, httpCode, message);
-	next();
+		sendErrorEmail(err, req.user)
+			.then(() => logger.info('Email sent'))
+			.catch(error => logger.error('Error sending email:', error));
+		errorRes(res, httpCode, 'Whoops! Something went wrong!');
+	} else {
+		logger.error('Caught error:', message);
+		errorRes(res, httpCode, message);
+		next();
+	}
 };

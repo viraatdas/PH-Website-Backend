@@ -6,7 +6,7 @@ import { validate, ValidationError } from 'class-validator';
 
 const getError = (errors: ValidationError[]) => Object.values(errors[0].constraints).pop();
 
-describe('Member model unit tests', () => {
+describe('Event model unit tests', () => {
 	it('Successfully creates an event object', async () => {
 		const event = new EventDto();
 		Object.assign(event, generateEvent());

@@ -19,7 +19,7 @@ import { router as locations } from './routes/locations';
 import { router as credentials } from './routes/credentials';
 import { router as permissions } from './routes/permissions';
 import { router as autocomplete } from './routes/autocomplete';
-import { router as reports } from './routes/reports';
+// import { router as reports } from './routes/reports';
 
 // import { AuthController } from './controllers/auth.controller';
 import { SuccessInterceptor } from './interceptors/success.interceptor';
@@ -89,7 +89,7 @@ export default class Server {
 		this.app.use('/api/credentials', credentials);
 		this.app.use('/api/permissions', permissions);
 		this.app.use('/api/autocomplete', autocomplete);
-		this.app.use('/api/report', reports);
+		// this.app.use('/api/report', reports);
 
 		// Any unhandled errors will be caught in this middleware
 		// this.app.use(globalError);

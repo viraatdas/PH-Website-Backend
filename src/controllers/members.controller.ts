@@ -29,11 +29,12 @@ import {
 import { BaseController } from './base.controller';
 import { ValidationMiddleware } from '../middleware/validation';
 import { StorageService } from '../services/storage.service';
+import { EmailService } from '../services/email.service';
 
 @JsonController('/api/members')
 @UseAfter(ValidationMiddleware)
 export class MemberController extends BaseController {
-	constructor(private storageService?: StorageService) {
+	constructor(private emailService?: EmailService, private storageService?: StorageService) {
 		super();
 	}
 
@@ -117,18 +118,51 @@ export class MemberController extends BaseController {
 
 		const picture = files.find(file => file.fieldname === 'picture');
 		const resume = files.find(file => file.fieldname === 'resume');
-		if (picture)
-			memberDto.picture = await this.storageService.uploadToStorage(
-				picture,
-				'pictures',
-				memberDto
-			);
-		if (resume)
-			memberDto.resume = await this.storageService.uploadToStorage(
-				resume,
-				'resumes',
-				memberDto
-			);
+		// if (picture)
+		// 	memberDto.picture = await this.storageService.uploadToStorage(
+		// 		picture,
+		// 		'pictures',
+		// 		memberDto
+		// 	);
+		// if (resume)
+		// 	memberDto.resume = await this.storageService.uploadToStorage(
+		// 		resume,
+		// 		'resumes',
+		// 		memberDto
+		// 	);
+
+		if (picture) {
+			try {
+				memberDto.picture = await this.storageService.uploadToStorage(
+					picture,
+					'pictures',
+					memberDto
+				);
+			} catch (error) {
+				this.logger.emerg('Error uploading picture:', error);
+				this.emailService
+					.sendErrorEmail(error, user)
+					.then(() => this.logger.info('Email sent'))
+					.catch(error => this.logger.error('Error sending email:', error));
+				throw new BadRequestError('Something is wrong! Unable to upload at the moment!');
+			}
+		}
+		if (resume) {
+			try {
+				memberDto.resume = await this.storageService.uploadToStorage(
+					resume,
+					'resumes',
+					memberDto
+				);
+			} catch (error) {
+				this.logger.emerg('Error uploading resume:', error);
+				this.emailService
+					.sendErrorEmail(error, user)
+					.then(() => this.logger.info('Email sent'))
+					.catch(error => this.logger.error('Error sending email:', error));
+				throw new BadRequestError('Something is wrong! Unable to upload at the moment!');
+			}
+		}
 
 		let member = await Member.findById(id, '+password').exec();
 		if (!member) throw new BadRequestError('Member not found');

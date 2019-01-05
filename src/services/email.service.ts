@@ -2,7 +2,7 @@ import * as jwt from 'jsonwebtoken';
 import * as sendGrid from '@sendgrid/mail';
 import CONFIG from '../config';
 import { IEventModel } from '../models/event';
-import { IMemberModel } from '../models/member';
+import { IMemberModel, MemberDto } from '../models/member';
 import { formatDate } from '../utils';
 import { Service } from 'typedi';
 
@@ -60,7 +60,7 @@ export class EmailService {
 		} as any);
 	}
 
-	async sendErrorEmail(error: Error, user?: IMemberModel) {
+	async sendErrorEmail(error: Error, user?: MemberDto) {
 		return sendGrid.send({
 			templateId: 'd-9fbbdf1f9c90423a80d69b83885eefa8',
 			from: `"${CONFIG.ORG_NAME}" <${CONFIG.EMAIL}>`,

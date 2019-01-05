@@ -21,7 +21,6 @@ import {
 } from 'routing-controllers';
 import { ValidationMiddleware } from '../middleware/validation';
 import { BaseController } from './base.controller';
-import { compareSync, hashSync } from 'bcrypt';
 import { EmailService } from '../services/email.service';
 import { StorageService } from '../services/storage.service';
 
@@ -63,10 +62,38 @@ export class AuthController extends BaseController {
 		const picture = files.find(file => file.fieldname === 'picture');
 		const resume = files.find(file => file.fieldname === 'resume');
 
-		if (picture)
-			member.picture = await this.storageService.uploadToStorage(picture, 'pictures', member);
-		if (resume)
-			member.resume = await this.storageService.uploadToStorage(resume, 'resumes', member);
+		if (picture) {
+			try {
+				member.picture = await this.storageService.uploadToStorage(
+					picture,
+					'pictures',
+					member
+				);
+			} catch (error) {
+				this.logger.emerg('Error uploading picture:', error);
+				this.emailService
+					.sendErrorEmail(error, member)
+					.then(() => this.logger.info('Email sent'))
+					.catch(error => this.logger.error('Error sending email:', error));
+				throw new BadRequestError('Something is wrong! Unable to upload at the moment!');
+			}
+		}
+		if (resume) {
+			try {
+				member.resume = await this.storageService.uploadToStorage(
+					resume,
+					'resumes',
+					member
+				);
+			} catch (error) {
+				this.logger.emerg('Error uploading resume:', error);
+				this.emailService
+					.sendErrorEmail(error, member)
+					.then(() => this.logger.info('Email sent'))
+					.catch(error => this.logger.error('Error sending email:', error));
+				throw new BadRequestError('Something is wrong! Unable to upload at the moment!');
+			}
+		}
 
 		const user = new Member(member);
 		await user.save();

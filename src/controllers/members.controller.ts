@@ -7,7 +7,7 @@ import { Event, IEventModel } from '../models/event';
 import { Location } from '../models/location';
 import { Permission } from '../models/permission';
 import { Job } from '../models/job';
-import { memberMatches, uploadToStorage, multer, addMemberToPermissions } from '../utils';
+import { memberMatches, multer, addMemberToPermissions } from '../utils';
 import {
 	JsonController,
 	Get,
@@ -28,10 +28,15 @@ import {
 } from 'routing-controllers';
 import { BaseController } from './base.controller';
 import { ValidationMiddleware } from '../middleware/validation';
+import { StorageService } from '../services/storage.service';
 
 @JsonController('/api/members')
 @UseAfter(ValidationMiddleware)
 export class MemberController extends BaseController {
+	constructor(private storageService?: StorageService) {
+		super();
+	}
+
 	@Get('/')
 	async getAll(@QueryParam('sortBy') sortBy?: string, @QueryParam('order') order?: number) {
 		order = order === 1 ? 1 : -1;
@@ -112,8 +117,18 @@ export class MemberController extends BaseController {
 
 		const picture = files.find(file => file.fieldname === 'picture');
 		const resume = files.find(file => file.fieldname === 'resume');
-		if (picture) memberDto.picture = await uploadToStorage(picture, 'pictures', memberDto);
-		if (resume) memberDto.resume = await uploadToStorage(resume, 'resumes', memberDto);
+		if (picture)
+			memberDto.picture = await this.storageService.uploadToStorage(
+				picture,
+				'pictures',
+				memberDto
+			);
+		if (resume)
+			memberDto.resume = await this.storageService.uploadToStorage(
+				resume,
+				'resumes',
+				memberDto
+			);
 
 		let member = await Member.findById(id, '+password').exec();
 		if (!member) throw new BadRequestError('Member not found');

@@ -6,7 +6,7 @@ import * as jwt from 'jsonwebtoken';
 import CONFIG from '../config';
 import { Member, MemberDto, IMemberModel } from '../models/member';
 import { Permission } from '../models/permission';
-import { multer, uploadToStorage, sendResetEmail } from '../utils';
+import { multer } from '../utils';
 import {
 	JsonController,
 	Post,
@@ -22,12 +22,18 @@ import {
 import { ValidationMiddleware } from '../middleware/validation';
 import { BaseController } from './base.controller';
 import { compareSync, hashSync } from 'bcrypt';
+import { EmailService } from '../services/email.service';
+import { StorageService } from '../services/storage.service';
 
 export const router = express.Router();
 
 @JsonController('/api/auth')
 @UseAfter(ValidationMiddleware)
 export class AuthController extends BaseController {
+	constructor(private emailService?: EmailService, private storageService?: StorageService) {
+		super();
+	}
+
 	@Post('/signup')
 	@UseBefore(multer.any())
 	async signup(@Req() req: Request, @Body() member: MemberDto) {
@@ -57,8 +63,10 @@ export class AuthController extends BaseController {
 		const picture = files.find(file => file.fieldname === 'picture');
 		const resume = files.find(file => file.fieldname === 'resume');
 
-		if (picture) member.picture = await uploadToStorage(picture, 'pictures', member);
-		if (resume) member.resume = await uploadToStorage(resume, 'resumes', member);
+		if (picture)
+			member.picture = await this.storageService.uploadToStorage(picture, 'pictures', member);
+		if (resume)
+			member.resume = await this.storageService.uploadToStorage(resume, 'resumes', member);
 
 		const user = new Member(member);
 		await user.save();
@@ -109,7 +117,7 @@ export class AuthController extends BaseController {
 		const token = jwt.sign({ id: member._id }, CONFIG.SECRET, { expiresIn: '2 days' });
 		member.resetPasswordToken = token;
 		await member.save();
-		const res = await sendResetEmail(member);
+		const res = await this.emailService.sendResetEmail(member);
 		this.logger.info('Sent email:', res);
 		return `A link to reset your password has been sent to: ${email}`;
 	}

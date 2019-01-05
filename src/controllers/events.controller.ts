@@ -3,7 +3,7 @@ import { isEmail } from 'validator';
 import { ObjectId } from 'mongodb';
 import { Event, EventDto } from '../models/event';
 import { Member, IMemberModel } from '../models/member';
-import { sendAccountCreatedEmail, hasPermission } from '../utils';
+import { hasPermission } from '../utils';
 import {
 	JsonController,
 	Req,
@@ -21,12 +21,17 @@ import {
 } from 'routing-controllers';
 import { BaseController } from './base.controller';
 import { ValidationMiddleware } from '../middleware/validation';
+import { EmailService } from '../services/email.service';
 
 // TODO: Add auth to routes
 // TODO: Add permissions to routess
 @JsonController('/api/events')
 @UseAfter(ValidationMiddleware)
 export class EventsController extends BaseController {
+	constructor(private emailService?: EmailService) {
+		super();
+	}
+
 	@Get('/')
 	async getAll(
 		@QueryParam('sortBy') sortBy: string,
@@ -223,11 +228,11 @@ export class EventsController extends BaseController {
 
 			await member.save();
 			// TODO: Send welcome email when member is created
-			await sendAccountCreatedEmail(member, event);
+			await this.emailService.sendAccountCreatedEmail(member, event);
 		}
 		// Existing Member, If account not setup, send creation email
 		else if (member.graduationYear === 0) {
-			await sendAccountCreatedEmail(member, event);
+			await this.emailService.sendAccountCreatedEmail(member, event);
 		}
 
 		// Check if Repeat

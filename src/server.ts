@@ -8,7 +8,8 @@ import * as passport from 'passport';
 import * as cors from 'cors';
 import * as helmet from 'helmet';
 import * as yes from 'yes-https';
-import { useExpressServer } from 'routing-controllers';
+import { useExpressServer, useContainer } from 'routing-controllers';
+import { Container } from 'typedi';
 import CONFIG from './config';
 import passportMiddleWare, { extractUser } from './middleware/passport';
 import { globalError } from './middleware/globalError';
@@ -49,6 +50,7 @@ export default class Server {
 	private setup(): void {
 		this.setupMiddleware();
 		// Enable controllers in this.app
+		useContainer(Container);
 		this.app = useExpressServer(this.app, {
 			cors: true,
 			defaultErrorHandler: false,

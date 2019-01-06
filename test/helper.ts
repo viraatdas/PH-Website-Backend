@@ -38,6 +38,19 @@ export const generateEvent = () => {
 	};
 };
 
+export const generateCredential = () => {
+	const site = faker.internet.url();
+	const username = faker.internet.userName();
+	const password = faker.internet.password();
+	const description = faker.lorem.sentence();
+	return {
+		site,
+		username,
+		password,
+		description
+	};
+};
+
 const spoofFacebookEvent = () => {
 	const startTime = faker.date.future();
 	const name = faker.hacker.noun();
@@ -60,5 +73,8 @@ export const generateUsers = (numUsers: number) => Array.from({ length: numUsers
 
 export const generateEvents = (numEvents: number) =>
 	Array.from({ length: numEvents }, generateEvent);
+
+export const generateCredentials = (numCredentials: number) =>
+	Array.from({ length: numCredentials }, generateCredential);
 
 export const getError = (errors: ValidationError[]) => Object.values(errors[0].constraints).pop();

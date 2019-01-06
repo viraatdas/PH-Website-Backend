@@ -118,3 +118,5 @@ export const addMemberToPermissions = async (
 };
 
 export const toBoolean = (val: any, obj: any, type) => `${val}`.toLowerCase() === 'true';
+
+export const isNotEmpty = (obj: any, val: any) => val !== '' && val !== null && val !== undefined;

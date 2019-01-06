@@ -16,9 +16,7 @@ import {
 } from 'class-validator';
 import { IsPhoneNumber } from '../validators/phone';
 import { Exclude, Expose, Transform } from 'class-transformer';
-import { toBoolean } from '../utils';
-
-const isNotEmpty = (obj: any, val: any) => val !== '' && val !== null && val !== undefined;
+import { toBoolean, isNotEmpty } from '../utils';
 
 export const genders = {
 	MALE: 'Male',

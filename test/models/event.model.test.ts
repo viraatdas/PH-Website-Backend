@@ -1,10 +1,10 @@
 import 'jest';
 import 'reflect-metadata';
-import { generateEvent } from '../helper';
+import { generateEvent, getError } from '../helper';
 import { EventDto } from '../../src/models/event';
 import { validate, ValidationError } from 'class-validator';
 
-const getError = (errors: ValidationError[]) => Object.values(errors[0].constraints).pop();
+// const getError = (errors: ValidationError[]) => Object.values(errors[0].constraints).pop();
 
 describe('Event model unit tests', () => {
 	it('Successfully creates an event object', async () => {
@@ -73,6 +73,14 @@ describe('Event model unit tests', () => {
 			expect(result.length).toEqual(1);
 			const err = getError(result);
 			expect(err).toEqual('Event must have a time');
+		});
+
+		it('Succeeds because valid time', async () => {
+			const event = new EventDto();
+			Object.assign(event, generateEvent());
+			event.eventTime = new Date();
+			const result = await validate(event);
+			expect(result.length).toEqual(0);
 		});
 
 		it('Succeeds because valid time', async () => {

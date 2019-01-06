@@ -1,10 +1,10 @@
 import 'jest';
 import * as faker from 'faker';
-import { generateUser } from '../helper';
+import { generateUser, getError } from '../helper';
 import { MemberDto, genders, majors } from '../../src/models/member';
-import { validate, ValidationError } from 'class-validator';
+import { validate } from 'class-validator';
 
-const getError = (errors: ValidationError[]) => Object.values(errors[0].constraints).pop();
+// const getError = (errors: ValidationError[]) => Object.values(errors[0].constraints).pop();
 
 describe('Member model unit tests', () => {
 	it('Successfully creates a member object', async () => {

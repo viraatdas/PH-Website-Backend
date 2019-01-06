@@ -1,4 +1,5 @@
 import * as faker from 'faker';
+import { ValidationError } from 'class-validator';
 
 export const generateUser = () => {
 	const first = faker.name.firstName();
@@ -54,6 +55,10 @@ const spoofFacebookEvent = () => {
 
 export const spoofFacebookEvents = (numEvents: number) =>
 	Array.from({ length: numEvents }, (v, i) => ({ ...spoofFacebookEvent(), id: i }));
+
 export const generateUsers = (numUsers: number) => Array.from({ length: numUsers }, generateUser);
+
 export const generateEvents = (numEvents: number) =>
 	Array.from({ length: numEvents }, generateEvent);
+
+export const getError = (errors: ValidationError[]) => Object.values(errors[0].constraints).pop();

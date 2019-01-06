@@ -94,8 +94,8 @@ describe('Report Route Tests', () => {
 			signedUpUsers[1].user.createdAt = new Date(2018, 5);
 			signedUpUsers[2].user.createdAt = new Date(2017, 7);
 			signedUpUsers[3].user.createdAt = new Date(2017, 7);
-			signedUpUsers[4].user.createdAt = new Date(2016, 12);
-			signedUpUsers[5].user.createdAt = new Date(2016, 1);
+			signedUpUsers[4].user.createdAt = new Date(2016, 11);
+			signedUpUsers[5].user.createdAt = new Date(2016, 0);
 
 			for (const user of signedUpUsers) {
 				const databaseUser = await Member.findById(user.user._id).exec();
@@ -129,8 +129,8 @@ describe('Report Route Tests', () => {
 			signedUpUsers[1].user.createdAt = new Date(2018, 5);
 			signedUpUsers[2].user.createdAt = new Date(2017, 7);
 			signedUpUsers[3].user.createdAt = new Date(2017, 7);
-			signedUpUsers[4].user.createdAt = new Date(2016, 12);
-			signedUpUsers[5].user.createdAt = new Date(2016, 2);
+			signedUpUsers[4].user.createdAt = new Date(2016, 11);
+			signedUpUsers[5].user.createdAt = new Date(2016, 1);
 
 			for (const user of signedUpUsers) {
 				const databaseUser = await Member.findById(user.user._id).exec();
@@ -197,12 +197,12 @@ describe('Report Route Tests', () => {
 			const events = await [
 				new Event({
 					...generateEvent(),
-					eventTime: new Date(2016, 1),
+					eventTime: new Date(2016, 0),
 					members: signedUpUsersIds.slice(0, 4)
 				}),
 				new Event({
 					...generateEvent(),
-					eventTime: new Date(2016, 2),
+					eventTime: new Date(2017, 1),
 					members: signedUpUsersIds.slice(0, 3)
 				}),
 				new Event({
@@ -228,7 +228,7 @@ describe('Report Route Tests', () => {
 			expect(status).toEqual(200);
 			expect(response.eventAttendancePerMonth).toEqual({
 				'01/2016': 4,
-				'02/2016': 3,
+				'02/2017': 3,
 				'05/2018': 2,
 				'06/2018': 1
 			});

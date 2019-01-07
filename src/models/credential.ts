@@ -11,15 +11,10 @@ export class CredentialDto {
 	username: string;
 	@IsNotEmpty({ message: 'Credential must have a password' })
 	password: string;
-	// @ValidateIf(isNotEmpty)
 	description: string;
 }
 
 export interface ICredentialModel extends CredentialDto, Document {
-	// site: string;
-	// username: string;
-	// password: string;
-	// description: string;
 	createdAt: Date;
 	updatedAt: Date;
 }

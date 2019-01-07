@@ -19,7 +19,7 @@ const signUpUsers = members =>
 		)
 	);
 
-describe('Report Route Tests', () => {
+describe('Suite: /api/reports', () => {
 	beforeAll(() =>
 		Server.createInstance().then(s => {
 			server = s;
@@ -89,13 +89,12 @@ describe('Report Route Tests', () => {
 			const signedUpUsers = await signUpUsers(members);
 
 			// Update each member to have different createdAt dates
-			// * Date months are 0 index so a month of 12 is actually January
-			signedUpUsers[0].user.createdAt = new Date(2018, 5);
-			signedUpUsers[1].user.createdAt = new Date(2018, 5);
-			signedUpUsers[2].user.createdAt = new Date(2017, 7);
-			signedUpUsers[3].user.createdAt = new Date(2017, 7);
-			signedUpUsers[4].user.createdAt = new Date(2016, 11);
-			signedUpUsers[5].user.createdAt = new Date(2016, 0);
+			signedUpUsers[0].user.createdAt = new Date('05/20/2018');
+			signedUpUsers[1].user.createdAt = new Date('05/20/2018');
+			signedUpUsers[2].user.createdAt = new Date('07/20/2017');
+			signedUpUsers[3].user.createdAt = new Date('07/20/2017');
+			signedUpUsers[4].user.createdAt = new Date('12/20/2016');
+			signedUpUsers[5].user.createdAt = new Date('01/20/2016');
 
 			for (const user of signedUpUsers) {
 				const databaseUser = await Member.findById(user.user._id).exec();
@@ -124,13 +123,12 @@ describe('Report Route Tests', () => {
 			const signedUpUsers = await signUpUsers(members);
 
 			// Update each member to have different createdAt dates
-			// * Date months are 0 index so a month of 12 is actually January
-			signedUpUsers[0].user.createdAt = new Date(2018, 5);
-			signedUpUsers[1].user.createdAt = new Date(2018, 5);
-			signedUpUsers[2].user.createdAt = new Date(2017, 7);
-			signedUpUsers[3].user.createdAt = new Date(2017, 7);
-			signedUpUsers[4].user.createdAt = new Date(2016, 11);
-			signedUpUsers[5].user.createdAt = new Date(2016, 1);
+			signedUpUsers[0].user.createdAt = new Date('05/20/2018');
+			signedUpUsers[1].user.createdAt = new Date('05/20/2018');
+			signedUpUsers[2].user.createdAt = new Date('07/20/2017');
+			signedUpUsers[3].user.createdAt = new Date('07/20/2017');
+			signedUpUsers[4].user.createdAt = new Date('12/20/2016');
+			signedUpUsers[5].user.createdAt = new Date('02/20/2016');
 
 			for (const user of signedUpUsers) {
 				const databaseUser = await Member.findById(user.user._id).exec();
@@ -197,22 +195,22 @@ describe('Report Route Tests', () => {
 			const events = await [
 				new Event({
 					...generateEvent(),
-					eventTime: new Date(2016, 0),
+					eventTime: new Date('01/20/2016'),
 					members: signedUpUsersIds.slice(0, 4)
 				}),
 				new Event({
 					...generateEvent(),
-					eventTime: new Date(2017, 1),
+					eventTime: new Date('02/20/2017'),
 					members: signedUpUsersIds.slice(0, 3)
 				}),
 				new Event({
 					...generateEvent(),
-					eventTime: new Date(2018, 5),
+					eventTime: new Date('05/20/2018'),
 					members: signedUpUsersIds.slice(0, 2)
 				}),
 				new Event({
 					...generateEvent(),
-					eventTime: new Date(2018, 6),
+					eventTime: new Date('06/20/2018'),
 					members: signedUpUsersIds.slice(0, 1)
 				})
 			].map(event => {

@@ -67,7 +67,11 @@ export function to<T, U = any>(
 		});
 }
 
-export const addMemberToPermission = async (member, permission, user) =>
+export const addMemberToPermission = async (
+	member: IMemberModel,
+	permission: IPermissionModel,
+	user: IMemberModel
+) =>
 	Promise.all([
 		Member.findByIdAndUpdate(
 			member._id,
@@ -86,6 +90,39 @@ export const addMemberToPermission = async (member, permission, user) =>
 						member: member._id,
 						recordedBy: user._id,
 						dateAdded: new Date()
+					}
+				}
+			},
+			{ new: true }
+		)
+			.populate({
+				path: 'members.member',
+				model: Member
+			})
+			.populate({
+				path: 'members.recordedBy',
+				model: Member
+			})
+			.exec()
+	]);
+
+export const removeMemberFromPermission = (member: IMemberModel, permission: IPermissionModel) =>
+	Promise.all([
+		Member.findByIdAndUpdate(
+			member._id,
+			{
+				$pull: {
+					permissions: permission._id
+				}
+			},
+			{ new: true }
+		).exec(),
+		Permission.findByIdAndUpdate(
+			permission._id,
+			{
+				$pull: {
+					members: {
+						member: member._id
 					}
 				}
 			},

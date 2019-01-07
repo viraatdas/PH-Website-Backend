@@ -87,7 +87,7 @@ export default class Server {
 		this.app.use('/api/jobs', jobs);
 		this.app.use('/api/locations', locations);
 		// this.app.use('/api/credentials', credentials);
-		this.app.use('/api/permissions', permissions);
+		// this.app.use('/api/permissions', permissions);
 		// this.app.use('/api/autocomplete', autocomplete);
 		// this.app.use('/api/report', reports);
 

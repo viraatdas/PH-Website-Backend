@@ -51,6 +51,15 @@ export const generateCredential = () => {
 	};
 };
 
+export const generatePermission = () => {
+	const name = faker.lorem.word();
+	const description = faker.lorem.sentence();
+	return {
+		name,
+		description
+	};
+};
+
 const spoofFacebookEvent = () => {
 	const startTime = faker.date.future();
 	const name = faker.hacker.noun();
@@ -66,15 +75,15 @@ const spoofFacebookEvent = () => {
 	};
 };
 
-export const spoofFacebookEvents = (numEvents: number) =>
-	Array.from({ length: numEvents }, (v, i) => ({ ...spoofFacebookEvent(), id: i }));
+export const spoofFacebookEvents = (num: number) =>
+	Array.from({ length: num }, (v, i) => ({ ...spoofFacebookEvent(), id: i }));
 
-export const generateUsers = (numUsers: number) => Array.from({ length: numUsers }, generateUser);
+export const generateUsers = (num: number) => Array.from({ length: num }, generateUser);
 
-export const generateEvents = (numEvents: number) =>
-	Array.from({ length: numEvents }, generateEvent);
+export const generateEvents = (num: number) => Array.from({ length: num }, generateEvent);
 
-export const generateCredentials = (numCredentials: number) =>
-	Array.from({ length: numCredentials }, generateCredential);
+export const generateCredentials = (num: number) => Array.from({ length: num }, generateCredential);
+
+export const generatePermissions = (num: number) => Array.from({ length: num }, generatePermission);
 
 export const getError = (errors: ValidationError[]) => Object.values(errors[0].constraints).pop();

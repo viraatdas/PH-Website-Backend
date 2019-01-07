@@ -2,7 +2,7 @@ import 'jest';
 import * as supertest from 'supertest';
 import Server from '../../src/server';
 import { ObjectId } from 'mongodb';
-import { generateEvent, generateCredential, generateUser, generateCredentials } from '../helper';
+import { generateCredential, generateUser, generateCredentials } from '../helper';
 import { Member, IMemberModel } from '../../src/models/member';
 import { Permission } from '../../src/models/permission';
 import CONFIG from '../../src/config';

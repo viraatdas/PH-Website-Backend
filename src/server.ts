@@ -17,7 +17,7 @@ import { router as home } from './routes/home';
 import { router as jobs } from './routes/jobs';
 import { router as locations } from './routes/locations';
 // import { router as credentials } from './routes/credentials';
-import { router as permissions } from './routes/permissions';
+// import { router as permissions } from './routes/permissions';
 // import { router as autocomplete } from './routes/autocomplete';
 // import { router as reports } from './routes/reports';
 

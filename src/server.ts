@@ -55,7 +55,7 @@ export default class Server {
 			cors: true,
 			defaultErrorHandler: false,
 			validation: true,
-			controllers: [__dirname + '/controllers/*.ts'],
+			controllers: [__dirname + '/controllers/*'],
 			// controllers: [AuthController, MemberController, EventsController],
 			interceptors: [SuccessInterceptor],
 			currentUserChecker,

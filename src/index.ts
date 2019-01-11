@@ -1,4 +1,5 @@
 import 'reflect-metadata';
+require('source-map-support').install();
 import Server from './server';
 import CONFIG from './config';
 const { PORT } = CONFIG;
@@ -21,7 +22,8 @@ const start = async () => {
 		return server;
 	} catch (error) {
 		console.error('Error:', error);
-		return null;
+		// return null;
+		throw error;
 	}
 };
 

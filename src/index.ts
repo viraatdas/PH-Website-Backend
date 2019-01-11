@@ -8,7 +8,7 @@ const start = async () => {
 	try {
 		const server = await Server.createInstance();
 		const httpServer = server.app.listen(PORT, () => {
-			// server.logger.info('CONFIG: ', CONFIG);
+			if (CONFIG.NODE_ENV === 'production') server.logger.info('CONFIG:', CONFIG);
 			server.logger.info(`Listening on port: ${PORT}`);
 		});
 

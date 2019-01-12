@@ -13,9 +13,9 @@ import { Container } from 'typedi';
 import CONFIG from './config';
 import passportMiddleWare, { extractUser } from './middleware/passport';
 import { globalError } from './middleware/globalError';
-import { router as home } from './routes/home';
+// import { router as home } from './routes/home';
 import { router as jobs } from './routes/jobs';
-import { router as locations } from './routes/locations';
+// import { router as locations } from './routes/locations';
 // import { router as credentials } from './routes/credentials';
 // import { router as permissions } from './routes/permissions';
 // import { router as autocomplete } from './routes/autocomplete';
@@ -80,12 +80,12 @@ export default class Server {
 	}
 
 	private setupRoutes() {
-		this.app.use('/api', home);
+		// this.app.use('/api', home);
 		// this.app.use('/api/auth', auth);
 		// this.app.use('/api/members', members);
 		// this.app.use('/api/events', events);
 		this.app.use('/api/jobs', jobs);
-		this.app.use('/api/locations', locations);
+		// this.app.use('/api/locations', locations);
 		// this.app.use('/api/credentials', credentials);
 		// this.app.use('/api/permissions', permissions);
 		// this.app.use('/api/autocomplete', autocomplete);

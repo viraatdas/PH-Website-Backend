@@ -2,7 +2,7 @@
 	"debug": true,
 
 	"signal": "SIGTERM",
-	"exec": "ts-node ./src/index.ts",
+	"exec": "yarn server",
 	"ignore": [
 		"mochawesome-report",
 		"node_modules",

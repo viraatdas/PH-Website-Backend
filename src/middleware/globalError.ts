@@ -21,6 +21,6 @@ export const globalError = (err, req, res, next) => {
 	} else {
 		logger.error('Caught error:', message);
 		errorRes(res, httpCode, message);
-		next();
+		// next(err);
 	}
 };

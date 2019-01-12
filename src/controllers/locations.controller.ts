@@ -3,14 +3,13 @@ import {
 	Get,
 	BadRequestError,
 	UseAfter,
-	QueryParam,
 	Param,
 	Post,
-	Body
+	Body,
+	Authorized
 } from 'routing-controllers';
 import { BaseController } from './base.controller';
 import { ValidationMiddleware } from '../middleware/validation';
-import { Member } from '../models/member';
 import { Location, LocationDto } from '../models/location';
 import { ObjectId } from 'bson';
 
@@ -40,6 +39,7 @@ export class LocationsController extends BaseController {
 	}
 
 	@Post('/:id')
+	@Authorized(['admin'])
 	async updateById(@Param('id') id: string, @Body() body: LocationDto) {
 		if (!ObjectId.isValid(id)) throw new BadRequestError('Invalid location ID');
 		const location = await Location.findById(id)

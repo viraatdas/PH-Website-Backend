@@ -8,11 +8,12 @@ import {
 	Body,
 	Authorized
 } from 'routing-controllers';
+import { ObjectId } from 'bson';
 import { BaseController } from './base.controller';
 import { ValidationMiddleware } from '../middleware/validation';
 import { Location, LocationDto } from '../models/location';
-import { ObjectId } from 'bson';
 
+// TODO: Add tests
 @JsonController('/api/locations')
 @UseAfter(ValidationMiddleware)
 export class LocationsController extends BaseController {

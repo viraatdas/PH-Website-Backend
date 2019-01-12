@@ -3,7 +3,8 @@ import { ILocationModel, Location } from './location';
 import { IMemberModel, Member } from './member';
 import { IsDate } from '../validators/date';
 import { Type } from 'class-transformer';
-import { IsOptional, IsNotEmpty, IsDefined } from 'class-validator';
+import { IsOptional, IsNotEmpty, IsDefined, ValidateIf } from 'class-validator';
+import { isNotEmpty } from '../utils';
 
 export class JobDto {
 	@IsNotEmpty({ message: 'Job must have a name' })
@@ -14,7 +15,7 @@ export class JobDto {
 	@IsDate({ message: 'Invalid start date' })
 	@Type(() => Date)
 	start: Date;
-	@IsOptional()
+	@ValidateIf(isNotEmpty)
 	@IsDate({ message: 'Invalid end date' })
 	@Type(() => Date)
 	end: Date;

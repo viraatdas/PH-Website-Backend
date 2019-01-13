@@ -10,41 +10,52 @@ import * as helmet from 'helmet';
 import * as yes from 'yes-https';
 import { useExpressServer, useContainer } from 'routing-controllers';
 import { Container } from 'typedi';
+import { Queue } from 'bull';
 import CONFIG from './config';
 import passportMiddleWare, { extractUser } from './middleware/passport';
 import { globalError } from './middleware/globalError';
-// import { router as home } from './routes/home';
-// import { router as jobs } from './routes/jobs';
-// import { router as locations } from './routes/locations';
-// import { router as credentials } from './routes/credentials';
-// import { router as permissions } from './routes/permissions';
-// import { router as autocomplete } from './routes/autocomplete';
-// import { router as reports } from './routes/reports';
-
-// import { AuthController } from './controllers/auth.controller';
 import { SuccessInterceptor } from './interceptors/success.interceptor';
 import { currentUserChecker, authorizationChecker } from './middleware/authentication';
-// import { MemberController } from './controllers/members.controller';
-// import { EventsController } from './controllers/events.controller';
 import { createLogger } from './utils/logger';
 import { Logger } from 'winston';
+import { createQueue } from './utils/queue';
 
 const { NODE_ENV, DB } = CONFIG;
 
 export default class Server {
 	public static async createInstance() {
 		const server = new Server();
-		await server.mongoSetup();
+		await server.setupMongo();
 		return server;
 	}
 	public app: express.Application;
 	public mongoose: typeof mongoose;
 	public logger: Logger;
+	public queues: {
+		[x: string]: Queue<any>;
+	};
 
 	private constructor() {
 		this.app = express();
 		this.logger = createLogger(this);
+		this.queues = {};
 		this.setup();
+	}
+
+	public async startJobs() {
+		// Sync with events on facebook page every 3 hours
+		return Promise.all([
+			this.queues.facebook.add(
+				{},
+				{
+					repeat: {
+						cron: '0 */3 * * *'
+					},
+					removeOnComplete: true,
+					removeOnFail: true
+				}
+			)
+		]);
 	}
 
 	private setup(): void {
@@ -64,6 +75,8 @@ export default class Server {
 		// Any unhandled errors will be caught in this middleware
 		this.app.use(globalError);
 		this.setupRoutes();
+		// if (NODE_ENV === 'production')
+		this.setupQueues();
 	}
 
 	private setupMiddleware() {
@@ -94,7 +107,11 @@ export default class Server {
 		// this.app.use(globalError);
 	}
 
-	private async mongoSetup() {
+	private setupQueues() {
+		this.queues.facebook = createQueue('facebook');
+	}
+
+	private async setupMongo() {
 		try {
 			this.mongoose = await mongoose.connect(
 				DB,

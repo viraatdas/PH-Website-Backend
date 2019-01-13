@@ -75,8 +75,7 @@ export default class Server {
 		// Any unhandled errors will be caught in this middleware
 		this.app.use(globalError);
 		this.setupRoutes();
-		// if (NODE_ENV === 'production')
-		this.setupQueues();
+		if (NODE_ENV === 'production') this.setupQueues();
 	}
 
 	private setupMiddleware() {

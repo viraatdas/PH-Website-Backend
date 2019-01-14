@@ -2,8 +2,9 @@ import axios from 'axios';
 import { Job } from 'bull';
 import { Event } from '../models/event';
 import CONFIG from '../config';
-
+import { createLogger } from '../utils/logger';
 const { FACEBOOK_ACCESS_TOKEN: accessToken } = CONFIG;
+const logger = createLogger('Facebook worker');
 
 const getUpcomingFacebookEvents = async () => {
 	const {
@@ -45,7 +46,7 @@ const updateDatabase = async (upcomingEvents: any) => {
 			});
 
 			await event.save();
-			console.log('Created Event:', event);
+			logger.info('Created Event:', event);
 		} else {
 			// Update event
 			await Event.findOneAndUpdate(
@@ -62,7 +63,7 @@ const updateDatabase = async (upcomingEvents: any) => {
 					}
 				}
 			).exec();
-			console.log(
+			logger.info(
 				'Updated event:',
 				await Event.findOne({ facebook })
 					.lean()
@@ -76,10 +77,10 @@ const updateDatabase = async (upcomingEvents: any) => {
 	// Reflect facebook event deletions in the database
 	if (upcomingEventsLinks.length > 0) {
 		for (const currEventInTheDatabaseFacebookLink of upcomingEventsLinks) {
-			await Event.findOneAndDelete({
+			const e = await Event.findOneAndDelete({
 				facebook: { $eq: currEventInTheDatabaseFacebookLink }
 			}).exec();
-			console.log('Deleted event');
+			logger.info('Deleted event', e);
 		}
 	}
 };
@@ -87,7 +88,7 @@ const updateDatabase = async (upcomingEvents: any) => {
 export const syncFacebookEvents = async (job: Job) => {
 	// Get all upcoming facebook events id's
 	const upcomingEvents = await getUpcomingFacebookEvents();
-	console.log('Got upcoming events:', upcomingEvents);
+	logger.info('Got upcoming events:', upcomingEvents);
 	await updateDatabase(upcomingEvents);
 };
 

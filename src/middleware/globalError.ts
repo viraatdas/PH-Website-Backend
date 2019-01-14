@@ -1,10 +1,10 @@
-import { Container } from 'typedi';
+import { getFromContainer } from 'routing-controllers';
 import { errorRes } from '../utils';
 import { createLogger } from '../utils/logger';
 import { EmailService } from '../services/email.service';
 
 const logger = createLogger('GlobalError');
-const emailService = Container.get(EmailService);
+const emailService = getFromContainer(EmailService);
 
 export const globalError = (err, req, res, next) => {
 	let { message, httpCode } = err;

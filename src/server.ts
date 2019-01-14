@@ -11,13 +11,13 @@ import * as yes from 'yes-https';
 import { useExpressServer, useContainer } from 'routing-controllers';
 import { Container } from 'typedi';
 import { Queue } from 'bull';
+import { Logger } from 'winston';
 import CONFIG from './config';
 import passportMiddleWare, { extractUser } from './middleware/passport';
 import { globalError } from './middleware/globalError';
 import { SuccessInterceptor } from './interceptors/success.interceptor';
 import { currentUserChecker, authorizationChecker } from './middleware/authentication';
 import { createLogger } from './utils/logger';
-import { Logger } from 'winston';
 import { createQueue } from './utils/queue';
 
 const { NODE_ENV, DB } = CONFIG;

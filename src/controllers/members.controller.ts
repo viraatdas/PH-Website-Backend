@@ -95,17 +95,13 @@ export class MemberController extends BaseController {
 		if (!ObjectId.isValid(id)) throw new BadRequestError('Invalid member ID');
 		if (!memberMatches(user, id))
 			throw new UnauthorizedError('You are unauthorized to edit this profile');
+		let member = await Member.findById(id, '+password').exec();
+		if (!member) throw new BadRequestError('Member not found');
 
-		const { password, passwordConfirm } = req.body;
 		const files: Express.Multer.File[] = req.files
 			? (req.files as Express.Multer.File[])
 			: new Array<Express.Multer.File>();
 
-		if (!password || password.length < 5)
-			throw new BadRequestError('A password longer than 5 characters is required');
-		// if (!password) throw new BadRequestError('A password is required');
-		if (!passwordConfirm) throw new BadRequestError('Please confirm your password');
-		if (password !== passwordConfirm) throw new BadRequestError('Passwords does not match');
 		memberDto.graduationYear = Number(memberDto.graduationYear);
 		const maxYear = new Date().getFullYear() + 20;
 		if (memberDto.graduationYear < 1869 || memberDto.graduationYear > maxYear)
@@ -118,18 +114,6 @@ export class MemberController extends BaseController {
 
 		const picture = files.find(file => file.fieldname === 'picture');
 		const resume = files.find(file => file.fieldname === 'resume');
-		// if (picture)
-		// 	memberDto.picture = await this.storageService.uploadToStorage(
-		// 		picture,
-		// 		'pictures',
-		// 		memberDto
-		// 	);
-		// if (resume)
-		// 	memberDto.resume = await this.storageService.uploadToStorage(
-		// 		resume,
-		// 		'resumes',
-		// 		memberDto
-		// 	);
 
 		if (picture) {
 			try {
@@ -163,10 +147,6 @@ export class MemberController extends BaseController {
 				throw new BadRequestError('Something is wrong! Unable to upload at the moment!');
 			}
 		}
-
-		let member = await Member.findById(id, '+password').exec();
-		if (!member) throw new BadRequestError('Member not found');
-		if (!member.comparePassword(password)) throw new UnauthorizedError('Incorrect password');
 
 		member = await Member.findByIdAndUpdate(id, memberDto, { new: true }).exec();
 		return member;

@@ -115,69 +115,69 @@ describe('Member controller unit tests', () => {
 			).rejects.toEqual(new UnauthorizedError('You are unauthorized to edit this profile'));
 		});
 
-		it('Fails to update a single user because no password confirm', async () => {
-			await expect(
-				memberController.updateById(
-					{
-						body: {
-							passwordConfirm: 'WrongPassword'
-						}
-					} as any,
-					user.user._id,
-					user.user,
-					user.user
-				)
-			).rejects.toEqual(
-				new BadRequestError('A password longer than 5 characters is required')
-			);
-		});
+		// it('Fails to update a single user because no password confirm', async () => {
+		// 	await expect(
+		// 		memberController.updateById(
+		// 			{
+		// 				body: {
+		// 					passwordConfirm: 'WrongPassword'
+		// 				}
+		// 			} as any,
+		// 			user.user._id,
+		// 			user.user,
+		// 			user.user
+		// 		)
+		// 	).rejects.toEqual(
+		// 		new BadRequestError('A password longer than 5 characters is required')
+		// 	);
+		// });
 
-		it('Fails to update a single user because no password confirm', async () => {
-			await expect(
-				memberController.updateById(
-					{
-						body: {
-							password: 'WrongPassword'
-						}
-					} as any,
-					user.user._id,
-					user.user,
-					user.user
-				)
-			).rejects.toEqual(new BadRequestError('Please confirm your password'));
-		});
+		// it('Fails to update a single user because no password confirm', async () => {
+		// 	await expect(
+		// 		memberController.updateById(
+		// 			{
+		// 				body: {
+		// 					password: 'WrongPassword'
+		// 				}
+		// 			} as any,
+		// 			user.user._id,
+		// 			user.user,
+		// 			user.user
+		// 		)
+		// 	).rejects.toEqual(new BadRequestError('Please confirm your password'));
+		// });
 
-		it('Fails to update a single user because passwords do not match', async () => {
-			await expect(
-				memberController.updateById(
-					{
-						body: {
-							password: 'WrongPassword',
-							passwordConfirm: 'WrongPasswordWrong'
-						}
-					} as any,
-					user.user._id,
-					user.user,
-					user.user
-				)
-			).rejects.toEqual(new UnauthorizedError('Passwords does not match'));
-		});
+		// it('Fails to update a single user because passwords do not match', async () => {
+		// 	await expect(
+		// 		memberController.updateById(
+		// 			{
+		// 				body: {
+		// 					password: 'WrongPassword',
+		// 					passwordConfirm: 'WrongPasswordWrong'
+		// 				}
+		// 			} as any,
+		// 			user.user._id,
+		// 			user.user,
+		// 			user.user
+		// 		)
+		// 	).rejects.toEqual(new UnauthorizedError('Passwords does not match'));
+		// });
 
-		it('Fails to update a single user because incorrect password', async () => {
-			await expect(
-				memberController.updateById(
-					{
-						body: {
-							password: 'WrongPassword',
-							passwordConfirm: 'WrongPassword'
-						}
-					} as any,
-					user.user._id,
-					user.user,
-					user.user
-				)
-			).rejects.toEqual(new UnauthorizedError('Incorrect password'));
-		});
+		// it('Fails to update a single user because incorrect password', async () => {
+		// 	await expect(
+		// 		memberController.updateById(
+		// 			{
+		// 				body: {
+		// 					password: 'WrongPassword',
+		// 					passwordConfirm: 'WrongPassword'
+		// 				}
+		// 			} as any,
+		// 			user.user._id,
+		// 			user.user,
+		// 			user.user
+		// 		)
+		// 	).rejects.toEqual(new UnauthorizedError('Incorrect password'));
+		// });
 
 		it('Successfully updates a single users name', async () => {
 			const generatedUser = generatedUsers.find(val => user.user.email === val.email);

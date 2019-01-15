@@ -148,7 +148,13 @@ export class MemberController extends BaseController {
 			}
 		}
 
-		member = await Member.findByIdAndUpdate(id, memberDto, { new: true }).exec();
+		member = await Member.findByIdAndUpdate(id, memberDto, { new: true })
+			.populate({
+				path: 'permissions',
+				model: Permission
+			})
+			.lean()
+			.exec();
 		return member;
 	}
 

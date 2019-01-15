@@ -33,8 +33,8 @@ export class JobsController extends BaseController {
 		return jobs;
 	}
 
-	@Authorized()
 	@Post('/')
+	@Authorized()
 	async createJob(@Body() body: JobDto, @CurrentUser() user: IMemberModel) {
 		if (!ObjectId.isValid(body.memberID)) throw new BadRequestError('Invalid member id');
 
@@ -72,7 +72,6 @@ export class JobsController extends BaseController {
 					address: `${body.name}, ${body.city}`
 				}
 			});
-			this.logger.info('Got Data:', data);
 			if (data.results.length) {
 				location.lat = data.results[0].geometry.location.lat;
 				location.lng = data.results[0].geometry.location.lng;
@@ -114,8 +113,8 @@ export class JobsController extends BaseController {
 		return job;
 	}
 
-	@Authorized()
 	@Delete('/:id')
+	@Authorized()
 	async removeById(@Param('id') id: string, @CurrentUser() user: IMemberModel) {
 		if (!ObjectId.isValid(id)) throw new BadRequestError('Invalid job id');
 		const job = await Job.findById(id)

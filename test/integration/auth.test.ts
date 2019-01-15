@@ -1,15 +1,18 @@
+import 'jest';
 import * as supertest from 'supertest';
-import Server from '../src/server';
-import { generateUser } from '../src/utils/helper';
+import Server from '../../src/server';
+import { generateUser } from '../helper';
 
 let server: Server;
 let request: supertest.SuperTest<supertest.Test>;
 
 describe('Auth route tests', () => {
 	beforeAll(() =>
-		Server.createInstance()
-			.then(s => (server = s))
-			.then(s => (request = supertest(s.app))));
+		Server.createInstance().then(s => {
+			server = s;
+			request = supertest(s.app);
+		})
+	);
 
 	describe('Signup Tests', () => {
 		it('Fails because no name', async () => {
@@ -31,7 +34,7 @@ describe('Auth route tests', () => {
 				status
 			} = await request.post('/api/auth/signup').send(newUser);
 			expect(status).toEqual(400);
-			expect(error).toEqual('Please provide your email');
+			expect(error).toEqual('Please provide a valid email address');
 		});
 
 		it('Fails because invalid email', async () => {
@@ -42,7 +45,7 @@ describe('Auth route tests', () => {
 				status
 			} = await request.post('/api/auth/signup').send(newUser);
 			expect(status).toEqual(400);
-			expect(error).toEqual('Invalid email');
+			expect(error).toEqual('Please provide a valid email address');
 		});
 
 		it('Fails because password is too short', async () => {
@@ -53,9 +56,7 @@ describe('Auth route tests', () => {
 				status
 			} = await request.post('/api/auth/signup').send(newUser);
 			expect(status).toEqual(400);
-			expect(error).toEqual(
-				'A password longer than 5 characters is required'
-			);
+			expect(error).toEqual('A password longer than 5 characters is required');
 		});
 
 		it('Fails because password not confirmed', async () => {
@@ -99,7 +100,7 @@ describe('Auth route tests', () => {
 				status: statusCode
 			} = await request.post('/api/auth/signup').send(generatedUser);
 			expect(statusCode).toEqual(400);
-			expect(error).toEqual('An account already exists with that email. Please use your Purdue Hackers account password if you have one');
+			expect(error).toEqual('An account already exists with that email');
 		});
 
 		it('Successfully creates a user', async () => {
@@ -108,7 +109,7 @@ describe('Auth route tests', () => {
 				body: { response },
 				status
 			} = await request.post('/api/auth/signup').send(generatedUser);
-			expect(status).toStrictEqual(200);
+			expect(status).toEqual(200);
 			expect(response).toHaveProperty('token');
 			expect(response).toHaveProperty('user');
 			expect(response.user.name).toStrictEqual(generatedUser.name);
@@ -165,7 +166,7 @@ describe('Auth route tests', () => {
 				body: { response },
 				status
 			} = await request.post('/api/auth/signup').send(generatedUser);
-			expect(status).toStrictEqual(200);
+			expect(status).toEqual(200);
 			expect(response).toHaveProperty('token');
 			expect(response).toHaveProperty('user');
 			expect(response.user.name).toStrictEqual(generatedUser.name);

@@ -1,9 +1,4 @@
-import { join } from 'path';
-import { load } from 'dotenv';
-load();
-load({
-	path: join(process.cwd(), `.env.${process.env.NODE_ENV}`)
-});
+require('dotenv').config();
 
 const env = process.env;
 

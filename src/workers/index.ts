@@ -12,4 +12,4 @@ export const start = async () => {
 	}
 };
 
-start().catch(err => console.error('Uncaught worker error:', err));
+// start().catch(err => console.error('Uncaught worker error:', err));

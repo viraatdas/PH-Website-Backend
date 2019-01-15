@@ -60,6 +60,15 @@ export const generatePermission = () => {
 	};
 };
 
+export const generateLocation = () => {
+	const name = faker.lorem.word();
+	const city = faker.address.city();
+	return {
+		name,
+		city
+	};
+};
+
 const spoofFacebookEvent = () => {
 	const startTime = faker.date.future();
 	const name = faker.hacker.noun();
@@ -85,5 +94,7 @@ export const generateEvents = (num: number) => Array.from({ length: num }, gener
 export const generateCredentials = (num: number) => Array.from({ length: num }, generateCredential);
 
 export const generatePermissions = (num: number) => Array.from({ length: num }, generatePermission);
+
+export const generateLocations = (num: number) => Array.from({ length: num }, generateLocation);
 
 export const getError = (errors: ValidationError[]) => Object.values(errors[0].constraints).pop();

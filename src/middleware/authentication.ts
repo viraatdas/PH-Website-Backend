@@ -19,11 +19,10 @@ export const currentUserChecker = async (action: Action) => {
 	try {
 		verify(token, CONFIG.SECRET);
 	} catch (error) {
-		throw new UnauthorizedError('Invalid token');
+		return null;
 	}
 	const payload: any = decode(token);
-	if (!payload._id || !ObjectId.isValid(payload._id))
-		throw new UnauthorizedError('Invalid token');
+	if (!payload._id || !ObjectId.isValid(payload._id)) return null;
 
 	const user = await Member.findById(payload._id)
 		.populate({

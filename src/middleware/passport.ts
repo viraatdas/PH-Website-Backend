@@ -4,7 +4,8 @@ import { Request, Response, NextFunction } from 'express';
 import CONFIG from '../config';
 import { Member, IMemberModel } from '../models/member';
 import { Permission } from '../models/permission';
-import { errorRes, hasPermission } from '../utils';
+import { errorRes, hasPermission, extractToken } from '../utils';
+import { ObjectId } from 'bson';
 
 passport.serializeUser<any, any>((user, done) => {
 	console.log('Passport serialize user:', user);
@@ -30,11 +31,14 @@ export default (pass: any) =>
 	pass.use(
 		new Strategy(
 			{
-				jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+				// jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+				jwtFromRequest: extractToken,
 				secretOrKey: CONFIG.SECRET
 			},
 			async (payload, done) => {
 				try {
+					if (!payload || !payload._id || !ObjectId.isValid(payload._id))
+						return done(null, false);
 					const user = await Member.findById(payload._id)
 						.populate({
 							path: 'permissions',
@@ -54,11 +58,7 @@ export default (pass: any) =>
 export const auth = () => (req: Request, res: Response, next: NextFunction) =>
 	req.user ? next() : errorRes(res, 401, 'Unauthorized');
 
-export const extractUser = () => (
-	req: Request,
-	res: Response,
-	next: NextFunction
-) =>
+export const extractUser = () => (req: Request, res: Response, next: NextFunction) =>
 	passport.authenticate('jwt', { session: true }, (err, data, info) => {
 		req.user = data || null;
 		next();

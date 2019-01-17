@@ -1537,7 +1537,7 @@ debug@^3.1.0:
   dependencies:
     ms "^2.1.1"
 
-debug@^4.1.0:
+debug@^4.1.0, debug@^4.1.1:
   version "4.1.1"
   resolved "https://registry.yarnpkg.com/debug/-/debug-4.1.1.tgz#3b72260255109c6b589cee050f1d516139664791"
   integrity sha512-pYAIzeRo8J6KPEaJ0VWOh5Pzkbw/RetuzehGM7QRRX5he4fPHx2rdKMB256ehJCkX+XRQm16eZLqLNS8RSZXZw==
@@ -2365,7 +2365,7 @@ get-func-name@^2.0.0:
   resolved "https://registry.yarnpkg.com/get-func-name/-/get-func-name-2.0.0.tgz#ead774abee72e20409433a066366023dd6887a41"
   integrity sha1-6td0q+5y4gQJQzoGY2YCPdaIekE=
 
-get-port@^4.0.0:
+get-port@^4.1.0:
   version "4.1.0"
   resolved "https://registry.yarnpkg.com/get-port/-/get-port-4.1.0.tgz#93eb3d5552c197497d76e9c389a6ac9920e20192"
   integrity sha512-4/fqAYrzrzOiqDrdeZRKXGdTGgbkfTEumGlNQPeP6Jy8w0PzN9mzeNQ3XgHaTNie8pQ3hOUkrwlZt2Fzk5H9mA==
@@ -4232,17 +4232,17 @@ mongodb-core@3.1.9:
   optionalDependencies:
     saslprep "^1.0.0"
 
-mongodb-memory-server@^2.8.0:
-  version "2.9.1"
-  resolved "https://registry.yarnpkg.com/mongodb-memory-server/-/mongodb-memory-server-2.9.1.tgz#5e1438cc2abd368c83e21059cb8d7fdffedcb304"
-  integrity sha512-SmAJMTiD3X4sY6neu+UsBAmbiyK3IikvZhf9unF0VdC3YE+vMkTcClbx1DuGVWQmimGPSt9d0odFLUmgKS3I/A==
+mongodb-memory-server@^3.0.0:
+  version "3.0.0"
+  resolved "https://registry.yarnpkg.com/mongodb-memory-server/-/mongodb-memory-server-3.0.0.tgz#4ce9b67177dee522b92ed98a8f1c38103c661e49"
+  integrity sha512-c6enWgoAqlYv8CbFuipDILoFAlALHPqmQxK37mEfayxT0zzESYGggQUKKD8u8p74ApjAyqXUpxSI0Ffb49sv7g==
   dependencies:
     "@babel/runtime" "^7.2.0"
-    debug "^4.1.0"
+    debug "^4.1.1"
     decompress "^4.2.0"
     dedent "^0.7.0"
     find-cache-dir "^2.0.0"
-    get-port "^4.0.0"
+    get-port "^4.1.0"
     getos "^3.1.1"
     https-proxy-agent "^2.2.1"
     lockfile "^1.0.4"

@@ -1,29 +1,23 @@
 import { Action, UnauthorizedError } from 'routing-controllers';
-import { ExtractJwt } from 'passport-jwt';
 import { decode, verify } from 'jsonwebtoken';
 import { Member } from '../models/member';
 import { Permission } from '../models/permission';
 import { ObjectId } from 'bson';
 import CONFIG from '../config';
-import { hasPermission } from '../utils';
+import { hasPermission, extractToken } from '../utils';
 
 export const currentUserChecker = async (action: Action) => {
-	const token = ExtractJwt.fromExtractors([
-		ExtractJwt.fromAuthHeaderAsBearerToken(),
-		ExtractJwt.fromBodyField('token'),
-		ExtractJwt.fromHeader('token'),
-		ExtractJwt.fromUrlQueryParameter('token')
-	])(action.request);
+	const token = extractToken(action.request);
 	if (!token || token === 'null' || token === 'undefined') return null;
 
 	try {
 		verify(token, CONFIG.SECRET);
 	} catch (error) {
-		throw new UnauthorizedError('Invalid token');
+		return null;
 	}
+
 	const payload: any = decode(token);
-	if (!payload._id || !ObjectId.isValid(payload._id))
-		throw new UnauthorizedError('Invalid token');
+	if (!payload || !payload._id || !ObjectId.isValid(payload._id)) return null;
 
 	const user = await Member.findById(payload._id)
 		.populate({

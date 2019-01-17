@@ -6,7 +6,7 @@ import * as jwt from 'jsonwebtoken';
 import CONFIG from '../config';
 import { Member, MemberDto, IMemberModel } from '../models/member';
 import { Permission } from '../models/permission';
-import { multer } from '../utils';
+import { multer, extractToken } from '../utils';
 import {
 	JsonController,
 	Post,
@@ -129,9 +129,23 @@ export class AuthController extends BaseController {
 	}
 
 	@Get('/me')
-	async me(@CurrentUser({ required: true }) user: IMemberModel) {
+	async me(@Req() req: Request) {
 		// Renew user's auth token
-		const token = jwt.sign({ _id: user._id }, CONFIG.SECRET, { expiresIn: '7 days' });
+		let token = extractToken(req);
+		if (!token || token === 'null' || token === 'undefined')
+			throw new UnauthorizedError('No token provided');
+		const payload: any = jwt.decode(token);
+		if (!payload || !payload._id || !ObjectId.isValid(payload._id))
+			throw new UnauthorizedError('Invalid token');
+		const user = await Member.findById(payload._id)
+			.populate({
+				path: 'permissions',
+				model: Permission
+			})
+			.lean()
+			.exec();
+		if (!user) throw new UnauthorizedError('Member not found');
+		token = jwt.sign({ _id: user._id }, CONFIG.SECRET, { expiresIn: '7 days' });
 		return { user, token };
 	}
 

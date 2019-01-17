@@ -1,6 +1,7 @@
-import { Response } from 'express';
+import { Response, Request } from 'express';
 import { ObjectId } from 'mongodb';
 import * as Multer from 'multer';
+import { ExtractJwt } from 'passport-jwt';
 import { IMemberModel, Member } from '../models/member';
 import { Permission, IPermissionModel } from '../models/permission';
 // export * from './email';
@@ -157,3 +158,11 @@ export const addMemberToPermissions = async (
 export const toBoolean = (val: any, obj: any, type) => `${val}`.toLowerCase() === 'true';
 
 export const isNotEmpty = (obj: any, val: any) => val !== '' && val !== null && val !== undefined;
+
+export const extractToken = (req: Request) =>
+	ExtractJwt.fromExtractors([
+		ExtractJwt.fromAuthHeaderAsBearerToken(),
+		ExtractJwt.fromBodyField('token'),
+		ExtractJwt.fromHeader('token'),
+		ExtractJwt.fromUrlQueryParameter('token')
+	])(req);

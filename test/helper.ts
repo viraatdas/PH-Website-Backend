@@ -98,3 +98,5 @@ export const generatePermissions = (num: number) => Array.from({ length: num }, 
 export const generateLocations = (num: number) => Array.from({ length: num }, generateLocation);
 
 export const getError = (errors: ValidationError[]) => Object.values(errors[0].constraints).pop();
+
+export const sleep = (time: number) => new Promise(resolve => setTimeout(resolve, time));

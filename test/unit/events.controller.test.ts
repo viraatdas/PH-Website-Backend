@@ -6,7 +6,6 @@ import { Member } from '../../src/models/member';
 import { Permission } from '../../src/models/permission';
 import { IEventModel, Event } from '../../src/models/event';
 import { EventsController } from '../../src/controllers/events.controller';
-import * as nock from 'nock';
 
 let server: Server;
 let eventsController: EventsController;
@@ -437,12 +436,8 @@ describe('Event controller unit tests', () => {
 			await member.save();
 			await event.save();
 
-			console.log('member', member);
-			console.log('event', event);
 			const eventAfterCheckout = await eventsController.checkout(event._id, member._id);
 			const memberAfterCheckout = await Member.findById(member._id).exec();
-			console.log('eventAfterCheckout', eventAfterCheckout);
-			console.log('memberAfterCheckout', memberAfterCheckout);
 
 			expect(eventAfterCheckout.members.length).toEqual(0);
 			expect(memberAfterCheckout.events.length).toEqual(0);

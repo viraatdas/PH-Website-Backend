@@ -268,7 +268,11 @@ describe('Auth route tests', () => {
 
 			expect(status).toEqual(200);
 			expect(response.user).toEqual(user.user);
-			expect(response.token).toEqual(user.token);
+			expect(response.token).toBeTruthy();
+			const payload: any = jwt.decode(response.token);
+			expect(payload._id).toEqual(user.user._id);
+			const isExpired = Date.now() / 1000 > payload.exp;
+			expect(isExpired).toEqual(false);
 		});
 
 		it('Successfully refreshes an expired token', async () => {
@@ -280,7 +284,7 @@ describe('Auth route tests', () => {
 			const newToken = jwt.sign({ _id: user.user._id }, CONFIG.SECRET, {
 				expiresIn: '1ms'
 			});
-			await sleep(1000);
+			await sleep(2000);
 			const {
 				body: { response },
 				status
@@ -288,7 +292,11 @@ describe('Auth route tests', () => {
 
 			expect(status).toEqual(200);
 			expect(response.user).toEqual(user.user);
-			expect(response.token).not.toEqual(user.token);
+			expect(response.token).toBeTruthy();
+			const payload: any = jwt.decode(response.token);
+			expect(payload._id).toEqual(user.user._id);
+			const isExpired = Date.now() / 1000 > payload.exp;
+			expect(isExpired).toEqual(false);
 		});
 	});
 
